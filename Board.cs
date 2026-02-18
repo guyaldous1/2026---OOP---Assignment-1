@@ -16,14 +16,18 @@ class Board
             }
         }
 
-        Console.WriteLine($"Not bed gud soize of {this.Size}");
+        Console.WriteLine($"Not bed gud soize of {this.Size} {this.Squares.Length}");
     }
 
     public void Show()
     {
-        foreach(Square sq in this.Squares)
+
+        for (int i = 0; i < this.Squares.Length; i++)
         {
-            Console.WriteLine(sq.Value);
+            var sq = this.Squares[i];
+
+            Console.Write($"({sq.Row} | {sq.Col})");
+            if((i + 1) % this.Size == 0) Console.Write("\n");
         }
     }
 }
@@ -31,8 +35,6 @@ class Board
 class Square
 {
     public int? Value {set; get;}
-
-    public int Location = 0;
 
     public int Row;
     public int Col;
