@@ -29,6 +29,9 @@ class Board
             Console.Write($"({sq.Row} | {sq.Col})");
             if((i + 1) % this.Size == 0) Console.Write("\n");
         }
+
+        //TODO show squares nicer
+        //TODO show values in squares
     }
 }
 
@@ -48,3 +51,5 @@ class Square
         this.Value = row * col;
     }
 }
+
+

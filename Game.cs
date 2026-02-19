@@ -1,5 +1,5 @@
 
-
+//TODO new class for pieces - created when board is created - assigned to player and assigned to square
 class Game
 {
     public Player Player1 = new Human(1);
@@ -8,6 +8,8 @@ class Game
     public Game()
     {
         //TODO game setup logic here
+        //TODO make data entry code nicer
+        //TODO remove setup lines when moving to first turn
 
         string mode;
         do
@@ -39,7 +41,9 @@ class Game
 
     public void Turn()
     {
-        //TODO process single turn logic here
+        //TODO process single turn logic here - increment turn counter
         this.Board.Show();
     }
+
+    //TODO win calculation logic
 }
