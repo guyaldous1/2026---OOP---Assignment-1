@@ -27,6 +27,8 @@ class Human : Player
 
     public override void DoMove()
     {
+
+        //TODO flip piece selection and cursor placement so you're moving around the piece you want to place
         int col;
         int row;
         Piece piece;
