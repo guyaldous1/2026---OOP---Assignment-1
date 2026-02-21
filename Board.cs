@@ -55,7 +55,6 @@ class Board
 
     //TODO method for displaying column, row and diagonal fullness
     //TODO method for displaying column, row and diagonal count total
-    //TODO method for get blank spaces (filter array of squares)
 }
 
 class Square(int row, int col)

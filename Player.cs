@@ -25,7 +25,6 @@ class Human : Player
         Cursor = new Cursor(0, this);
     }
 
-    //TODO method for move options
     public override void DoMove()
     {
         int col;
