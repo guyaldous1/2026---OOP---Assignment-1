@@ -15,6 +15,7 @@ class Game
     {
         //TODO make setup data entry code nicer
         //TODO error handling correctly
+        //TODO fix gameplay instructions to be more descriptive
 
         Console.Clear();
         // Step 1 setup mode
