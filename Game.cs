@@ -5,6 +5,7 @@ class Game
     public Player Player1;
     public Player Player2;
     public Board? Board;
+    public int TargetNumber => this.Board.Size*(this.Board.Size*this.Board.Size + 1) / 2;
     public Piece[] Pieces;
     public int TurnNumber = 1;
     public Player WhoseTurn => this.TurnNumber % 2 == 0 ? this.Player2 : this.Player1;
@@ -12,9 +13,8 @@ class Game
 
     public Game()
     {
-        //TODO game setup logic here
-        //TODO make data entry code nicer
-        //TODO remove setup lines when moving to first turn
+        //TODO make setup data entry code nicer
+        //TODO error handling correctly
 
         Console.Clear();
         // Step 1 setup mode
@@ -70,15 +70,13 @@ class Game
 
     public void Turn()
     {           
-        // Console.Clear();
         Console.WriteLine($"Starting Turn {this.TurnNumber}. It's Player {this.WhoseTurn.Position}'s Turn");
         
-        //TODO process single turn logic here - increment turn counter
+        //Show Board
         this.Board.Draw();
-
-        //TODO player position selects whose move should be allowed
+        //Allow current player to move
         WhoseTurn.DoMove();
-
+        //Check if move just won
         this.ResolveTurn();
 
         if(!this.Finished){
@@ -89,19 +87,25 @@ class Game
 
     public void ResolveTurn()
     {   
-        int n = this.Board.Size;
-        int targetNumber = n*(n*n + 1) / 2;
 
-        //TODO method for win calculation logic
+        if(this.Board.SquaresAvailable.Length <= 0)
+        {
+            this.Finished = true;
+            Console.WriteLine($"No winner, its a tie!");
+        }
+
         foreach (Square[] line in this.Board.Lines)
         {
             bool isFull = Array.TrueForAll(line, el => el.Value != null);
             if(!isFull) continue;
 
             int lineSum = line.Aggregate(0, (acc, el) => el.Value.Value + acc);
-            Console.WriteLine($"a line is full with sum {lineSum}");
+            // Console.WriteLine($"a line is full with sum {lineSum}");
             
-            if(lineSum == targetNumber) Console.WriteLine($"Player {this.WhoseTurn.Position} Wins!");
+            if(lineSum == this.TargetNumber) {
+                this.Finished = true;
+                Console.WriteLine($"Player {this.WhoseTurn.Position} Wins!");
+            }
         }
     }
 

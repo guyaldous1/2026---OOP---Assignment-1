@@ -46,19 +46,22 @@ class Human : Player
         Game.Board.Draw();
 
         //FIXME Cursor move (maybe should belong to cursor)? 
-        ConsoleKey[] validKeys = [ConsoleKey.LeftArrow, ConsoleKey.RightArrow, ConsoleKey.UpArrow, ConsoleKey.DownArrow, ConsoleKey.Enter];
+        ConsoleKey[] validKeys = [ConsoleKey.N, ConsoleKey.M, ConsoleKey.LeftArrow, ConsoleKey.RightArrow, ConsoleKey.UpArrow, ConsoleKey.DownArrow, ConsoleKey.Enter];
         ConsoleKeyInfo key;
         do
         {
             Console.WriteLine($"Player {Game.WhoseTurn.Position}: use the arrow keys to navigate the remaining spaces and press enter to select one");
             key = Console.ReadKey(true);
-
+            // Console.Write(key.Key);
             if (!validKeys.Contains(key.Key)) continue;
 
                 if(key.Key == ConsoleKey.LeftArrow)  this.Cursor.MoveLocation("left");
                 if(key.Key == ConsoleKey.RightArrow) this.Cursor.MoveLocation("right");
                 if(key.Key == ConsoleKey.UpArrow)    this.Cursor.MoveLocation("up");
                 if(key.Key == ConsoleKey.DownArrow)  this.Cursor.MoveLocation("down");
+                if(key.Key == ConsoleKey.N) this.Cursor.MoveLocation("prev");
+                if(key.Key == ConsoleKey.M) this.Cursor.MoveLocation("next");
+
                 if(key.Key == ConsoleKey.Enter)      selected = true;
 
                 Game.Board.Draw();
