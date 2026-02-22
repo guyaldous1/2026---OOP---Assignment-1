@@ -3,6 +3,24 @@ class Board
     public int Size;
     public Square[] Squares;
     public Square[] SquaresAvailable => Array.FindAll(this.Squares, s => s.Value == null);
+    public Square[] Column(int ColNum) => Array.FindAll(this.Squares, s => s.Col == ColNum);
+    public Square[] Row(int RowNum) => Array.FindAll(this.Squares, s => s.Row == RowNum);
+    public Square[] Diagonal(bool LtoR) => Array.FindAll(this.Squares, s => LtoR ? s.Row == s.Col : s.Row + s.Col == this.Size - 1);
+    public List<Square[]> Lines
+    {
+        get
+        {
+            List<Square[]> allLines = new();
+            for (int i = 0; i < Size; i++)
+            {
+                allLines.Add(this.Row(i));
+                allLines.Add(this.Column(i));
+            }
+            allLines.Add(this.Diagonal(true));
+            allLines.Add(this.Diagonal(false));
+            return allLines;
+        }
+    }
     private Game _game;
 
     public Board(int setSize, Game Game)
@@ -18,13 +36,11 @@ class Board
                 Squares[row * Size + col] = new Square(row, col);
             }
         }
-
-        Console.WriteLine($"Not bed gud soize of {this.Size} {this.Squares.Length}");
     }
 
     public void Draw()
     {
-        Console.Clear();
+        // Console.Clear();
         var Game = this._game;
 
         Console.Write($"Player 1's Remaining Pieces:");
@@ -78,26 +94,31 @@ class Cursor(int val, Player Player) : Piece(val, Player)
     public void MoveLocation(string direction)
     {
         if (!ValidDirections.Contains(direction)) return;
+        var Board = this.Owner.Game.Board;
 
         Square? next = null;
 
+        // 1. Get available squares in relevant row or column
+        // 2. Filter by are greater or less than current position based on direction selected
+        // 3. orders them by size based on direction selected
+        // 4. set the first available as the new square
         if(direction == "left")
-            next = this.Owner.Game.Board.SquaresAvailable
+            next = Board.SquaresAvailable
             .Where(x => x.Row == this.Location.Row && x.Col < this.Location.Col)
             .OrderByDescending(x => x.Col)
             .FirstOrDefault();
         else if(direction == "right")
-            next = this.Owner.Game.Board.SquaresAvailable
+            next = Board.SquaresAvailable
             .Where(x => x.Row == this.Location.Row && x.Col > this.Location.Col)
             .OrderBy(x => x.Col)
             .FirstOrDefault();
         else if(direction == "up")
-            next = this.Owner.Game.Board.SquaresAvailable
+            next = Board.SquaresAvailable
             .Where(x => x.Row < this.Location.Row && x.Col == this.Location.Col)
             .OrderByDescending(x => x.Row)
             .FirstOrDefault();
         else if(direction == "down")
-            next = this.Owner.Game.Board.SquaresAvailable
+            next = Board.SquaresAvailable
             .Where(x => x.Row > this.Location.Row && x.Col == this.Location.Col)
             .OrderBy(x => x.Row)
             .FirstOrDefault();

@@ -63,8 +63,6 @@ class Game
             this.Pieces[i] = new Piece(val, Owner);
         }
         
-        this.Player1.Write();
-        this.Player2.Write();
 
         this.Turn();
 
@@ -85,15 +83,26 @@ class Game
 
         if(!this.Finished){
             this.TurnNumber++;
-            Console.WriteLine($"Next Turn is {this.TurnNumber}");
             this.Turn();
         }
-
     }
 
     public void ResolveTurn()
-    {
+    {   
+        int n = this.Board.Size;
+        int targetNumber = n*(n*n + 1) / 2;
+
         //TODO method for win calculation logic
+        foreach (Square[] line in this.Board.Lines)
+        {
+            bool isFull = Array.TrueForAll(line, el => el.Value != null);
+            if(!isFull) continue;
+
+            int lineSum = line.Aggregate(0, (acc, el) => el.Value.Value + acc);
+            Console.WriteLine($"a line is full with sum {lineSum}");
+            
+            if(lineSum == targetNumber) Console.WriteLine($"Player {this.WhoseTurn.Position} Wins!");
+        }
     }
 
     
