@@ -88,13 +88,7 @@ class Game
 
     public void ResolveTurn()
     {   
-
-        if(this.Board.SquaresAvailable.Length <= 0)
-        {
-            this.Finished = true;
-            Console.WriteLine($"No winner, its a tie!");
-        }
-
+        this.Board.Draw();
         foreach (Square[] line in this.Board.Lines)
         {
             bool isFull = Array.TrueForAll(line, el => el.Value != null);
@@ -106,7 +100,15 @@ class Game
             if(lineSum == this.TargetNumber) {
                 this.Finished = true;
                 Console.WriteLine($"Player {this.WhoseTurn.Position} Wins!");
+                return; //prevents looping through further lines in the case of a win
+                //also deals with a winning move on the final turn, preventing progression to tie check
             }
+        }
+        //check if no squares left after a victory can't be found
+        if(this.Board.SquaresAvailable.Length <= 0)
+        {
+            this.Finished = true;
+            Console.WriteLine($"No winner, its a tie!");
         }
     }
 

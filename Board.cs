@@ -40,33 +40,46 @@ class Board
 
     public void Draw()
     {
-        Console.Clear();
+        // Console.Clear();
         var Game = this._game;
 
+        //write player 1 pieces
         Console.Write($"Player 1's Remaining Pieces:");
         foreach (Piece p in Game.Player1.PiecesAvailable)
         {
             Console.Write($" {p.Value}");
         }
         Console.Write('\n');
+        
+        //write board layout
+        for (int i = 0; i < this.Squares.Length; i++)
+        {
+            if(Game.WhoseTurn is Human human && human.Cursor.Location == this.Squares[i])
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write($"({human.Cursor.Value})");
+            }
+            else if(this.Squares[i].Value == null)
+            {
+                Console.ResetColor();
+                Console.Write($"( )");
+            }
+            else
+            {   
+                Console.ResetColor();
+                Console.Write($"({this.Squares[i].Value.Value})");
+            }
+
+            if((i + 1) % this.Size == 0) Console.Write("\n");
+        }
+
+        //write player 2 pieces
         Console.Write($"Player 2's Remaining Pieces:");
         foreach (Piece p in Game.Player2.PiecesAvailable)
         {
             Console.Write($" {p.Value}");
         }
         Console.Write('\n');
-        
-        for (int i = 0; i < this.Squares.Length; i++)
-        {
-            if(Game.WhoseTurn is Human human && human.Cursor.Location == this.Squares[i])
-                Console.Write($"({human.Cursor.Value})");
-            else if(this.Squares[i].Value == null)
-                Console.Write($"( )");
-            else
-                Console.Write($"({this.Squares[i].Value.Value})");
-
-            if((i + 1) % this.Size == 0) Console.Write("\n");
-        }
     }
 }
 

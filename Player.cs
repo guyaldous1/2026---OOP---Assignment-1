@@ -72,14 +72,77 @@ class Human : Player
         //Place Piece
         sq.Value = piece;
         piece.Location = sq;
+
+        this.Cursor.Location = null;
     }
 }
-class Computer(int Pos, Game game) : Player(Pos, game)
+class Computer(int Pos, Game Game) : Player(Pos, Game)
 {
     
     public override void DoMove()
     {
         //TODO method for computer AI (checking related methods of board fullness)
         Console.WriteLine("Com Turn");
+
+        //TODO if a line has a single gap, (length 1 under max) then check if it's a winning move and then place there
+        //TODO if not, pick any random available space and place there
+
+        Square sq;
+        List<Square[]> AlmostFullLines;
+        Piece p;
+
+        foreach (Square[] line in Game.Board.Lines)
+        {
+            int countOfFullLines = line.Count(el => el.Value != null);
+            bool isAlmostFull = countOfFullLines+1 == Game.Board.Size;
+            Console.WriteLine($"{isAlmostFull}");
+
+            if(!isAlmostFull) continue;
+        }
+
+        //check all available winning spots for a match
+        if (AlmostFullLines.Length > 0)
+        {
+            
+            foreach (Square[] line in AlmostFullLines)
+            {
+                Square emptySpace = line.First(el => el.Value == null);
+            
+                int lineSum = line.Aggregate(0, (acc, el) => el.Value != null ? el.Value.Value + acc : acc);
+                Console.WriteLine($"a line is almost full with sum {lineSum}");
+
+                int requires = Game.TargetNumber - lineSum;
+
+                Piece requiredPiece = this.PiecesAvailable.FirstOrDefault(el => el.Value == requires);
+
+                if(requiredPiece != null)
+                {
+                   sq = emptySpace;
+                   p = requiredPiece;
+                   break;
+                } 
+            }
+            
+        }
+
+        //if square not set in the above
+        if(sq == null)
+        {
+            var availSqurares = Game.Board.SquaresAvailable;
+            var availPieces = this.PiecesAvailable;
+
+            Random rng = new Random();
+            int sqrnum = rng.Next(0, Game.Board.SquaresAvailable.Length - 1);
+            int piecenum = rng.Next(0, this.PiecesAvailable.Length - 1);
+
+            sq = availSqurares[sqrnum];
+            p = availPieces[piecenum];
+        }
+
+        //set a space after resolution of the above
+        //FIXME replace with new Piece.Place(square) method
+        sq.Value = p;
+        p.Location = sq;
+
     }
 }
