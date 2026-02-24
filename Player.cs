@@ -20,6 +20,7 @@ class Human : Player
 
     public override void DoMove()
     {
+        Console.ResetColor();
 
         int col;
         int row;
@@ -81,27 +82,22 @@ class Computer(int Pos, Game Game) : Player(Pos, Game)
     
     public override void DoMove()
     {
-        //TODO method for computer AI (checking related methods of board fullness)
-        Console.WriteLine("Com Turn");
 
-        //TODO if a line has a single gap, (length 1 under max) then check if it's a winning move and then place there
-        //TODO if not, pick any random available space and place there
-
-        Square sq;
-        List<Square[]> AlmostFullLines;
-        Piece p;
+        Square sq = null;
+        List<Square[]> AlmostFullLines = [];
+        Piece p = null;
 
         foreach (Square[] line in Game.Board.Lines)
         {
             int countOfFullLines = line.Count(el => el.Value != null);
             bool isAlmostFull = countOfFullLines+1 == Game.Board.Size;
-            Console.WriteLine($"{isAlmostFull}");
+            // Console.WriteLine($"{isAlmostFull}");
 
-            if(!isAlmostFull) continue;
+            if(isAlmostFull) AlmostFullLines.Add(line);
         }
 
         //check all available winning spots for a match
-        if (AlmostFullLines.Length > 0)
+        if (AlmostFullLines.Count > 0)
         {
             
             foreach (Square[] line in AlmostFullLines)

@@ -30,6 +30,8 @@ class Game
 
         } while (mode != "1" && mode != "2");
 
+        
+
         //Player 1 always human
        this.Player1 = new Human(1, this);
 
@@ -47,9 +49,29 @@ class Game
         }
             
         //Step 2 Setup Board size and pieces
-        
-        Console.WriteLine($"How big dat board?");
-        int BoardSize = Convert.ToInt32(Console.ReadLine());
+        int boardInput;
+        while (true)
+        {
+
+            Console.WriteLine($"How big dat board?");
+            string input = Console.ReadLine();
+
+            if (!int.TryParse(input, out boardInput))
+            {
+                Console.WriteLine("Failed - Not even a number. Try Again.");
+                continue;
+            }
+
+            if (boardInput < 2 || boardInput > 10)
+            {
+                Console.WriteLine("That board is too big or too small");
+                continue;
+            }
+
+            break; 
+        }
+
+        int BoardSize = boardInput;
 
         this.Board = new Board(BoardSize, this);
 

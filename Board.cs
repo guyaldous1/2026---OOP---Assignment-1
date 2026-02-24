@@ -40,10 +40,11 @@ class Board
 
     public void Draw()
     {
-        // Console.Clear();
+        Console.Clear();
         var Game = this._game;
 
         //write player 1 pieces
+        Console.ForegroundColor = ConsoleColor.Green;
         Console.Write($"Player 1's Remaining Pieces:");
         foreach (Piece p in Game.Player1.PiecesAvailable)
         {
@@ -74,6 +75,8 @@ class Board
         }
 
         //write player 2 pieces
+        Console.ResetColor();
+        Console.ForegroundColor = ConsoleColor.Red;
         Console.Write($"Player 2's Remaining Pieces:");
         foreach (Piece p in Game.Player2.PiecesAvailable)
         {
