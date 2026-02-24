@@ -82,6 +82,7 @@ class Board
         {
             Console.Write($" {p.Value}");
         }
+        Console.ResetColor();
         Console.Write('\n');
     }
 }
