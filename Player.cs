@@ -22,23 +22,24 @@ class Human : Player
     {
         Console.ResetColor();
 
-        int col;
-        int row;
-        Piece piece;
+        Piece piece = null;
         Square sq;
         bool selected = false;
         
-         //Select Piece
-        do
+         //Select A Piece
+        while (true) 
         {
-            Console.WriteLine($"Player {this.Position}, enter the piece you'd like to use");
-            int pieceVal = Convert.ToInt32(Console.ReadLine());
-            piece = this.PiecesAvailable.FirstOrDefault(x => x.Value == pieceVal);
+            Console.WriteLine($"Player {this.Position}, enter the number of the piece you'd like to use and press enter to confirm:");
+            
+            if (int.TryParse(Console.ReadLine(), out int pieceEntered))
+            {
+                piece = this.PiecesAvailable.FirstOrDefault(x => x.Value == pieceEntered);
+                
+                if (piece != null) break;
+            }
 
-            if (piece == null)
-                Console.WriteLine("You Cunted it, try again.");
-
-        } while (piece == null);
+            Console.WriteLine($"That's not a valid piece, try again Player {this.Position}");
+        }
 
 
         // Initialise Cursor
@@ -46,15 +47,18 @@ class Human : Player
         this.Cursor.Value = piece.Value;
         Game.Board.Draw();
 
-        //FIXME Cursor move (maybe should belong to cursor)? 
+        //FIXME maybe should belong to cursor class as a method?
+
+        //Only accept valid inputs based on the keystrokes in this array
         ConsoleKey[] validKeys = [ConsoleKey.N, ConsoleKey.M, ConsoleKey.LeftArrow, ConsoleKey.RightArrow, ConsoleKey.UpArrow, ConsoleKey.DownArrow, ConsoleKey.Enter];
         ConsoleKeyInfo key;
         do
         {
-            Console.WriteLine($"Player {Game.WhoseTurn.Position}: use the arrow keys to navigate the remaining spaces and press enter to select one");
+            Console.WriteLine($"Player {this.Position}, use the arrow keys to navigate the remaining spaces and press enter to select one");
+            Console.WriteLine($"If the space you want to use is inaccessible with the arrow keys, use the n and m keys to cycle through available spaces");
+
             key = Console.ReadKey(true);
-            // Console.Write(key.Key);
-            if (!validKeys.Contains(key.Key)) continue;
+            if (validKeys.Contains(key.Key)){
 
                 if(key.Key == ConsoleKey.LeftArrow)  this.Cursor.MoveLocation("left");
                 if(key.Key == ConsoleKey.RightArrow) this.Cursor.MoveLocation("right");
@@ -66,14 +70,19 @@ class Human : Player
                 if(key.Key == ConsoleKey.Enter)      selected = true;
 
                 Game.Board.Draw();
+            }
+            else
+            {
+                Console.WriteLine("Double check the controls and try navigating with either the arrow keys or n&m.");
+            }
         } while (!selected);
         
         sq = Game.Board.Squares.FirstOrDefault(x => x.Row == this.Cursor.Location.Row && x.Col == this.Cursor.Location.Col);
 
         //Place Piece
-        sq.Value = piece;
-        piece.Location = sq;
+        sq.PlacePiece(piece);
 
+        //remove cursor from the board
         this.Cursor.Location = null;
     }
 }
@@ -83,45 +92,44 @@ class Computer(int Pos, Game Game) : Player(Pos, Game)
     public override void DoMove()
     {
 
-        Square sq = null;
+        Square? sq = null;
         List<Square[]> AlmostFullLines = [];
-        Piece p = null;
+        Piece? p = null;
 
-        foreach (Square[] line in Game.Board.Lines)
+        //Build a list of lines that have one space free/almost full
+        foreach (Square[] line in Game.Board.Lines!)
         {
             int countOfFullLines = line.Count(el => el.Value != null);
             bool isAlmostFull = countOfFullLines+1 == Game.Board.Size;
-            // Console.WriteLine($"{isAlmostFull}");
 
             if(isAlmostFull) AlmostFullLines.Add(line);
         }
 
-        //check all available winning spots for a match
+        //check all available spots for a winning move
         if (AlmostFullLines.Count > 0)
         {
             
             foreach (Square[] line in AlmostFullLines)
             {
-                Square emptySpace = line.First(el => el.Value == null);
-            
                 int lineSum = line.Aggregate(0, (acc, el) => el.Value != null ? el.Value.Value + acc : acc);
-                Console.WriteLine($"a line is almost full with sum {lineSum}");
-
                 int requires = Game.TargetNumber - lineSum;
 
-                Piece requiredPiece = this.PiecesAvailable.FirstOrDefault(el => el.Value == requires);
+                Piece? requiredPiece = this.PiecesAvailable.FirstOrDefault(el => el.Value == requires);
 
                 if(requiredPiece != null)
                 {
-                   sq = emptySpace;
-                   p = requiredPiece;
-                   break;
+                    Square emptySpace = line.First(el => el.Value == null);
+
+                    sq = emptySpace;
+                    p = requiredPiece;
+                    // don't check lines if winning move is found
+                    break;
                 } 
             }
             
         }
 
-        //if square not set in the above
+        //if no winning move is found, get available squares, and randomly pick a piece to place in a random square 
         if(sq == null)
         {
             var availSqurares = Game.Board.SquaresAvailable;
@@ -136,9 +144,7 @@ class Computer(int Pos, Game Game) : Player(Pos, Game)
         }
 
         //set a space after resolution of the above
-        //FIXME replace with new Piece.Place(square) method
-        sq.Value = p;
-        p.Location = sq;
+        sq.PlacePiece(p);
 
     }
 }
