@@ -19,21 +19,15 @@ class Human : Player
     public override void DoMove()
     {
         Console.ResetColor();
-        Piece piece = null;
-        Square sq;
-        bool selected = false;
-        
-         //Select A Piece
-        while (true) 
+        //Select A Piece
+        Piece? piece = null;
+        while (piece == null)
         {
             Console.WriteLine($"Player {this.Position}, enter the number of the piece you'd like to use and press enter to confirm:");
-            if (int.TryParse(Console.ReadLine(), out int pieceEntered))
-            {
-                piece = this.PiecesAvailable.FirstOrDefault(x => x.Value == pieceEntered);
-                if (piece != null) break;
-            }
-            Console.WriteLine($"That's not a valid piece, try again Player {this.Position}");
+            if (int.TryParse(Console.ReadLine(), out int val)) piece = PiecesAvailable.FirstOrDefault(x => x.Value == val);
+            if (piece == null) Console.WriteLine($"That's not a valid piece, try again Player {this.Position}");
         }
+        
         // Initialise Cursor
         this.Cursor.Location = Game.Board.SquaresAvailable[0];
         this.Cursor.Value = piece.Value;
