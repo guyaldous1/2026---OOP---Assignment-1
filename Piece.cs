@@ -12,13 +12,9 @@ class Cursor(int val, Player Player) : Piece(val, Player)
     {
         if (!ValidDirections.Contains(direction)) return;
         var Board = this.Owner.Game.Board;
-
+        
         Square? moveTo = null;
-
-        // 1. Get available squares in relevant row or column
-        // 2. Filter by are greater or less than current position based on direction selected
-        // 3. orders them by size based on direction selected
-        // 4. set the first available as the new square
+        // 1. Get available squares in relevant row or column 2. Filter by are greater or less than current position based on direction selected 3. orders them by size based on direction selected 4. set the first available as the new square
         if(direction == "left")
             moveTo = Board.SquaresAvailable
             .Where(x => x.Row == this.Location.Row && x.Col < this.Location.Col)
@@ -57,7 +53,6 @@ class Cursor(int val, Player Player) : Piece(val, Player)
                 Console.WriteLine("That would take you off the board, try again.");
             }
         }
-
         if (moveTo != null) this.Location = moveTo;
     }
 }

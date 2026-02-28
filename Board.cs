@@ -22,7 +22,6 @@ class Board
         }
     }
     private Game _game;
-
     public Board(int setSize, Game Game)
     {
         this.Size = setSize;
@@ -37,7 +36,6 @@ class Board
             }
         }
     }
-
     public void Draw()
     {
         Console.Clear();
@@ -72,7 +70,6 @@ class Board
                 Console.ResetColor();
                 Console.Write($"({this.Squares[i].Value.Value})");
             }
-
             if((i + 1) % this.Size == 0) Console.Write("\n");
         }
 
@@ -88,13 +85,11 @@ class Board
         Console.Write('\n');
     }
 }
-
 class Square(int row, int col)
 {
     public Piece? Value {private set; get;}
     public int Row = row;
     public int Col = col;
-
     public void PlacePiece(Piece piece)
     {
         this.Value = piece;

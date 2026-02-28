@@ -53,22 +53,14 @@ class Game
        this.Player1 = new Human(1, this);
 
         // Player 2 selected by mode
-        if (mode == 1)
-        {
-            this.Player2 = new Human(2, this);
-            Console.WriteLine("-- Human v Human --");
-        }
-        else
-        {
-            this.Player2 = new Computer(2, this);
-            Console.WriteLine("-- Human v Computer --");
-        }
-            
+        bool p2IsHuman = mode == 1;
+        this.Player2 = p2IsHuman ? new Human(2, this) : new Computer(2, this);
+        Console.WriteLine($"-- Human v {(p2IsHuman ? "Human" : "Computer")} --");
+
         //Step 2 Setup Board size and pieces
         int boardInput;
         while (true)
         {
-
             Console.WriteLine("-- Enter a number for the board size:");
             string input = Console.ReadLine()!;
             //if input can be parsed to an integer, proceed
@@ -77,34 +69,28 @@ class Game
                 Console.WriteLine("Failed - Not even a number. Try Again.");
                 continue;
             }
-
             if (boardInput < 2 || boardInput > 10)
             {
                 Console.WriteLine("That board is too small");
                 continue;
             }
-
             break; 
         }
 
         //setup board size
         int BoardSize = boardInput;
         this.Board = new Board(BoardSize, this);
-
         //Create pieces and assign players
         int pieceCount = BoardSize * BoardSize;
         this.Pieces = new Piece[pieceCount];
-
         for(int i = 0; i < pieceCount; i++)
         {
             int val = i+1;
             Player Owner = (i%2 == 0) ? this.Player1 : this.Player2;
             this.Pieces[i] = new Piece(val, Owner);
         }
-        
         //Initiate recursive turn logic
         this.Turn();
-
     }
 
     public void Turn()
@@ -115,7 +101,6 @@ class Game
         WhoseTurn.DoMove();
         //Check if move just won
         this.ResolveTurn();
-
         //If the game isn't over, increment and loop
         if(!this.Finished){
             this.TurnNumber++;
@@ -136,8 +121,7 @@ class Game
             if(lineSum == this.TargetNumber) {
                 this.Finished = true;
                 Console.WriteLine($"Player {this.WhoseTurn.Position} Wins!");
-                return; //prevents looping through further lines in the case of a win
-                //also deals with a winning move on the final turn, preventing progression to tie check
+                return; //prevents looping through further lines in the case of a win - also deals with a winning move on the final turn, preventing progression to tie check
             }
         }
         //check if no squares left after a victory can't be found

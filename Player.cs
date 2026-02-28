@@ -7,7 +7,6 @@ abstract class Player(int Pos, Game game)
     public Piece[] PiecesAvailable => Array.FindAll(this.Pieces, p => p.Location == null);
     public Game Game => game;
     public abstract void DoMove();
-    
 }
 
 class Human : Player
@@ -17,11 +16,9 @@ class Human : Player
     {
         Cursor = new Cursor(0, this);
     }
-
     public override void DoMove()
     {
         Console.ResetColor();
-
         Piece piece = null;
         Square sq;
         bool selected = false;
@@ -30,25 +27,17 @@ class Human : Player
         while (true) 
         {
             Console.WriteLine($"Player {this.Position}, enter the number of the piece you'd like to use and press enter to confirm:");
-            
             if (int.TryParse(Console.ReadLine(), out int pieceEntered))
             {
                 piece = this.PiecesAvailable.FirstOrDefault(x => x.Value == pieceEntered);
-                
                 if (piece != null) break;
             }
-
             Console.WriteLine($"That's not a valid piece, try again Player {this.Position}");
         }
-
-
         // Initialise Cursor
         this.Cursor.Location = Game.Board.SquaresAvailable[0];
         this.Cursor.Value = piece.Value;
         Game.Board.Draw();
-
-        //FIXME maybe should belong to cursor class as a method?
-
         //Only accept valid inputs based on the keystrokes in this array
         ConsoleKey[] validKeys = [ConsoleKey.N, ConsoleKey.M, ConsoleKey.LeftArrow, ConsoleKey.RightArrow, ConsoleKey.UpArrow, ConsoleKey.DownArrow, ConsoleKey.Enter];
         ConsoleKeyInfo key;
@@ -76,22 +65,17 @@ class Human : Player
                 Console.WriteLine("Double check the controls and try navigating with either the arrow keys or n&m.");
             }
         } while (!selected);
-        
         sq = Game.Board.Squares.FirstOrDefault(x => x.Row == this.Cursor.Location.Row && x.Col == this.Cursor.Location.Col);
-
         //Place Piece
         sq.PlacePiece(piece);
-
         //remove cursor from the board
         this.Cursor.Location = null;
     }
 }
 class Computer(int Pos, Game Game) : Player(Pos, Game)
 {
-    
     public override void DoMove()
     {
-
         Square? sq = null;
         List<Square[]> AlmostFullLines = [];
         Piece? p = null;
@@ -104,11 +88,9 @@ class Computer(int Pos, Game Game) : Player(Pos, Game)
 
             if(isAlmostFull) AlmostFullLines.Add(line);
         }
-
         //check all available spots for a winning move
         if (AlmostFullLines.Count > 0)
         {
-            
             foreach (Square[] line in AlmostFullLines)
             {
                 int lineSum = line.Aggregate(0, (acc, el) => el.Value != null ? el.Value.Value + acc : acc);
@@ -126,9 +108,7 @@ class Computer(int Pos, Game Game) : Player(Pos, Game)
                     break;
                 } 
             }
-            
         }
-
         //if no winning move is found, get available squares, and randomly pick a piece to place in a random square 
         if(sq == null)
         {
@@ -142,9 +122,7 @@ class Computer(int Pos, Game Game) : Player(Pos, Game)
             sq = availSqurares[sqrnum];
             p = availPieces[piecenum];
         }
-
         //set a space after resolution of the above
         sq.PlacePiece(p);
-
     }
 }
