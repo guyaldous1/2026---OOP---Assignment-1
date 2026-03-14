@@ -7,6 +7,7 @@ namespace TicTakToeApp
     static void Main(string[] args)
     { 
       Game IJustLostTheGame = new Game();
+      IJustLostTheGame.Start();
     }
   }
 }
