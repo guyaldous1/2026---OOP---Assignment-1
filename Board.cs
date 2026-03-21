@@ -2,7 +2,7 @@ class Board
 {
     public int Size;
     public Square[] Squares;
-    public Square[] SquaresAvailable => Array.FindAll(this.Squares, s => s.Value == null);
+    public Square[] SquaresAvailable => Array.FindAll(this.Squares, s => !s.IsOccupied);
     public Square[] Column(int ColNum) => Array.FindAll(this.Squares, s => s.Col == ColNum);
     public Square[] Row(int RowNum) => Array.FindAll(this.Squares, s => s.Row == RowNum);
     public Square[] Diagonal(bool LtoR) => Array.FindAll(this.Squares, s => LtoR ? s.Row == s.Col : s.Row + s.Col == this.Size - 1);
@@ -36,6 +36,7 @@ class Board
             }
         }
     }
+
     public void Draw()
     {
         Console.Clear();
@@ -60,7 +61,7 @@ class Board
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.Write($"({human.Cursor.Value})");
             }
-            else if(this.Squares[i].Value == null)
+            else if(!this.Squares[i].IsOccupied)
             {
                 Console.ResetColor();
                 Console.Write($"( )");
@@ -68,7 +69,7 @@ class Board
             else
             {   
                 Console.ResetColor();
-                Console.Write($"({this.Squares[i].Value.Value})");
+                Console.Write($"({_game.GetPieceValueForSquare(this.Squares[i])})");
             }
             if((i + 1) % this.Size == 0) Console.Write("\n");
         }
@@ -85,14 +86,10 @@ class Board
         Console.Write('\n');
     }
 }
+
 class Square(int row, int col)
 {
-    public Piece? Value {private set; get;}
+    public bool IsOccupied = false;
     public int Row = row;
     public int Col = col;
-    public void PlacePiece(Piece piece)
-    {
-        this.Value = piece;
-        piece.Location = this;
-    } 
 }
