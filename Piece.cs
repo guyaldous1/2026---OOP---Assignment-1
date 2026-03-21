@@ -1,6 +1,6 @@
 class Piece(int val, Player Player)
 {
-    public int Value = val;
+    public int Value = val; // TODO this will need to become a string/char
     public Player Owner = Player;
     public Square? Location {set; get;}
 }
@@ -11,7 +11,7 @@ class Cursor(int val, Player Player) : Piece(val, Player)
     public void MoveLocation(string direction)
     {
         if (!ValidDirections.Contains(direction)) return;
-        var Board = this.Owner.Game.Board;
+        var Board = this.Owner.Game.Boards[0]; // TODO this will need to become board count agnostic
         int cur = Array.IndexOf(Board.SquaresAvailable, this.Location);
         // 1. Get available squares in relevant row or column 2. Filter by are greater or less than current position based on direction selected 3. orders them by size based on direction selected 4. set the first available as the new square
         Square? moveTo = direction switch {

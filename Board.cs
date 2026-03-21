@@ -41,7 +41,7 @@ class Board
         Console.Clear();
         var Game = this._game;
         Console.WriteLine($"Turn {Game.TurnNumber}. It's Player {Game.WhoseTurn.Position}'s Turn");
-        Console.WriteLine($"The Target Number is {Game.TargetNumber}");
+        Game.ShowRuleForTurn();
     
         //write player 1 pieces
         Console.ForegroundColor = ConsoleColor.Green;

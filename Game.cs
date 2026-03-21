@@ -1,16 +1,19 @@
-class Game
+abstract class Game
 {
     // Properties - marked as 'null!' because they are initialized in Setup()
     public Player Player1 { get; private set; } = null!;
     public Player Player2 { get; private set; } = null!;
-    public Board Board { get; private set; } = null!;
-    public Piece[] Pieces { get; private set; } = Array.Empty<Piece>();
+    public Board[] Boards { get; protected set; } = null!;
+    public Piece[] Pieces { get; protected set; } = Array.Empty<Piece>();
     
     public int TurnNumber { get; private set; } = 1;
-    public bool Finished { get; private set; } = false;
+    public bool Finished { get; protected set; } = false;
+
+    public virtual string GameType { get; }
+
+    private string gameMode;
 
     // Expression-bodied properties for cleaner logic
-    public int TargetNumber => Board.Size * (Board.Size * Board.Size + 1) / 2;
     public Player WhoseTurn => TurnNumber % 2 == 0 ? Player2 : Player1;
 
     public Game()
@@ -19,19 +22,21 @@ class Game
         // It only prepares the object, it doesn't run the game.
     }
 
-    public void Start()
+    public Game(GameStateMemento state)
+    {
+        GameType = state.GameType;
+        // TODO stub for now.
+    }
+
+    public void StartGame()
     {
         Console.Clear();
         InitializePlayers();
-        InitializeBoard();
+        InitializeBoards();
+    }
 
-        // THE GAME LOOP (Iterative instead of Recursive)
-        // This runs until 'Finished' is set to true in ResolveTurn
-        while (!Finished)
-        {
-            PerformTurn();
-        }
-
+    public void EndGame()
+    {
         Console.WriteLine("--- Game Over ---");
         Console.ReadLine();
     }
@@ -53,42 +58,44 @@ class Game
 
         this.Player1 = new Human(1, this);
         bool p2IsHuman = (mode == 1);
+        this.gameMode = p2IsHuman ? "HvH" : "HvC";
         this.Player2 = p2IsHuman ? new Human(2, this) : new Computer(2, this);
         
         Console.Clear();
         Console.WriteLine($"-- Game Started: Human v {(p2IsHuman ? "Human" : "Computer")} --");
     }
 
-    private void InitializeBoard()
+    public void ShowHelp()
     {
-        int size = 0;
-        while (size < 2 || size > 10)
-        {
-            Console.WriteLine("-- Enter board size (2-10):");
-            if (!int.TryParse(Console.ReadLine(), out size) || size < 2 || size > 10)
-            {
-                Console.WriteLine("Invalid size. Please choose a number between 2 and 10.");
-            }
-        }
-
-        this.Board = new Board(size, this);
-        
-        // Create pieces and assign players
-        int pieceCount = size * size;
-        this.Pieces = new Piece[pieceCount];
-        for (int i = 0; i < pieceCount; i++)
-        {
-            int val = i + 1;
-            Player owner = (i % 2 == 0) ? Player1 : Player2;
-            this.Pieces[i] = new Piece(val, owner);
-        }
+        // TODO stub for now
     }
 
-    private void PerformTurn()
+    public virtual GameStateMemento CaptureState()
     {
-        this.Board.Draw();
+        var state = new GameStateMemento
+        {
+            GameType = GameType,
+            Mode = this.gameMode,
+            BoardSize = this.Boards[0].Size,
+            BoardCount = this.Boards.Length,
+            CurrentPlayerIndex = WhoseTurn == this.Player1 ? 1 : 2,
+
+            // TODO serialize history
+            //MoveHistory = History.GetAll(),
+            //HistoryPointer = History.Pointer
+        };
+
+        foreach (var board in Boards)
+            state.BoardValues.AddRange(board.Squares.Select(s => s.Value?.Value.ToString() ?? "").ToList());
+
+        return state;
+    }
+
+    public void PerformTurn()
+    {
+        DrawBoards();
         Console.WriteLine($"Turn {TurnNumber}: Player {WhoseTurn.Position}'s move.");
-        
+
         WhoseTurn.DoMove();
         ResolveTurn();
 
@@ -96,31 +103,25 @@ class Game
         {
             TurnNumber++;
         }
+        else
+        {
+            EndGame();
+        }
     }
 
-    public void ResolveTurn()
+    public abstract void ResolveTurn();
+
+    public abstract void ShowRuleForTurn();
+
+    protected abstract void InitializeBoards();
+
+    protected abstract void DrawBoards();
+
+    private string GetCommand()
     {
-        this.Board.Draw();
-
-        foreach (Square[] line in this.Board.Lines)
-        {
-            bool isFull = Array.TrueForAll(line, el => el.Value != null);
-            if (!isFull) continue;
-
-            int lineSum = line.Sum(el => el.Value!.Value);
-
-            if (lineSum == this.TargetNumber)
-            {
-                this.Finished = true;
-                Console.WriteLine($"Player {this.WhoseTurn.Position} Wins!");
-                return;
-            }
-        }
-
-        if (this.Board.SquaresAvailable.Length <= 0)
-        {
-            this.Finished = true;
-            Console.WriteLine("No winner, it's a tie!");
-        }
+        // TODO stub for now
+        Console.Write("Enter command (Enter for next turn)" + Environment.NewLine + "> ");
+        string? command = Console.ReadLine();
+        return string.IsNullOrWhiteSpace(command) ? "turn" : command ;
     }
 }
