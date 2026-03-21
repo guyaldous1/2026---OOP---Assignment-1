@@ -4,7 +4,7 @@ class Piece(int val, IGameContext gameContext, int ownerPosition)
 
     public int Value = val; // TODO this will need to become a string/char (or even an object)
 
-    public Square? Location {set; get;}
+    public Square? Location { get; set; }
 
     public int OwnerPosition = ownerPosition;
 }

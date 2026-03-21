@@ -18,10 +18,10 @@
 
         foreach (Square[] line in this.Boards[0].Lines)
         {
-            bool isFull = Array.TrueForAll(line, el => el.Value != null);
+            bool isFull = Array.TrueForAll(line, el => el.IsOccupied);
             if (!isFull) continue;
 
-            int lineSum = line.Sum(el => el.Value!.Value);
+            int lineSum = line.Sum(GetPieceValueForSquare);
 
             if (lineSum == this.targetNumber)
             {

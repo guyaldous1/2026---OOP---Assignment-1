@@ -11,6 +11,8 @@ interface IGameContext
 
     Piece[] GetPieces();
 
+    int GetPieceValueForSquare(Square sqaure);
+
     void DrawBoards();
 }
 

@@ -13,6 +13,7 @@ abstract class Player(int pos, IGameContext gameContext)
 class Human : Player
 {
     public Cursor Cursor;
+
     public Human(int pos, IGameContext gameContext) : base (pos, gameContext)
     {
         Cursor = new Cursor(0, gameContext, Position);
@@ -64,7 +65,8 @@ class Human : Player
         } while (!selected);
         Square? sq = GameContext.GetBoard(0).Squares.FirstOrDefault(x => x.Row == this.Cursor.Location.Row && x.Col == this.Cursor.Location.Col); // TODO cater for n boards
         //Place Piece
-        sq.PlacePiece(piece);
+        piece.Location = sq;
+        sq.IsOccupied = true;
         //remove cursor from the board
         this.Cursor.Location = null;
     }
@@ -81,7 +83,7 @@ class Computer(int pos, IGameContext Game) : Player(pos, Game)
         //Build a list of lines that have one space free/almost full
         foreach (Square[] line in GameContext.GetBoard(0).Lines!)
         {
-            int countOfFullLines = line.Count(el => el.Value != null);
+            int countOfFullLines = line.Count(el => el.IsOccupied);
             bool isAlmostFull = countOfFullLines+1 == GameContext.GetBoard(0).Size;
 
             if(isAlmostFull) AlmostFullLines.Add(line);
@@ -91,14 +93,14 @@ class Computer(int pos, IGameContext Game) : Player(pos, Game)
         {
             foreach (Square[] line in AlmostFullLines)
             {
-                int lineSum = line.Aggregate(0, (acc, el) => el.Value != null ? el.Value.Value + acc : acc);
+                int lineSum = line.Aggregate(0, (acc, el) => el.IsOccupied ? this.GameContext.GetPieceValueForSquare(el) + acc : acc);
                 int requires = ((TicTacToe)GameContext).targetNumber - lineSum; // TODO we can't leave this this way.
 
                 Piece? requiredPiece = this.PiecesAvailable.FirstOrDefault(el => el.Value == requires);
 
                 if(requiredPiece != null)
                 {
-                    Square emptySpace = line.First(el => el.Value == null);
+                    Square emptySpace = line.First(el => !el.IsOccupied);
 
                     sq = emptySpace;
                     p = requiredPiece;
@@ -121,6 +123,7 @@ class Computer(int pos, IGameContext Game) : Player(pos, Game)
             p = availPieces[piecenum];
         }
         //set a space after resolution of the above
-        sq.PlacePiece(p);
+        p.Location = sq;
+        sq.IsOccupied = true;
     }
 }

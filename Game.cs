@@ -89,7 +89,7 @@ abstract class Game : IGameContext
         };
 
         foreach (var board in Boards)
-            state.BoardValues.AddRange(board.Squares.Select(s => s.Value?.Value.ToString() ?? "").ToList());
+            state.BoardValues.AddRange(board.Squares.Select(s => GetPieceValueForSquare(s).ToString() ?? "").ToList());
 
         return state;
     }
@@ -110,6 +110,11 @@ abstract class Game : IGameContext
         {
             EndGame();
         }
+    }
+
+    public int GetPieceValueForSquare(Square square)
+    {
+        return this.Pieces.FirstOrDefault(p => p.Location == square)?.Value ?? 0;
     }
 
     public abstract void ResolveTurn();
