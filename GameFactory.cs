@@ -1,0 +1,35 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+
+
+// ============================================================
+// GAME FACTORY - Factory pattern
+// ============================================================
+static class GameFactory
+{
+    public static Game CreateGame(string type)
+    {
+        return type switch
+        {
+            "tictactoe" => new TicTacToe(),
+//TODO                "notakto" => new Notakto(),
+//TODO                "gomoku" => new Gomoku(),
+            _ => throw new ArgumentException($"Unknown game type: {type}")
+        };
+    }
+
+    public static Game CreateFromState(GameStateMemento state)
+    {
+        Game game = state.GameType switch
+        {
+            "tictactoe" => new TicTacToe(state),
+//TODO                "notakto" => new Notakto(state),
+//TODO                "gomoku" => new Gomoku(state),
+            _ => throw new ArgumentException($"Unknown game type: {state.GameType}")
+        };
+
+        return game;
+    }
+}
