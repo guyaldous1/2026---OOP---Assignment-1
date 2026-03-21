@@ -29,6 +29,7 @@ class Program
             if (gameType is not ("1" or "2" or "3")) gameType = "1";
 
             game = GameFactory.CreateGame(GameTypeNumericToGameType(gameType));
+            game.StartGame();
         }
 
         RunGame(game);
@@ -58,8 +59,6 @@ class Program
 
     static void RunGame(Game game)
     {
-        game.StartGame();
-
         // THE GAME LOOP (Iterative instead of Recursive)
         // This runs until 'Finished' is set to true in ResolveTurn
         string command = "turn"; // first turn is automatic

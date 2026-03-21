@@ -1,22 +1,23 @@
 
-
-abstract class Player(int Pos, Game game)
+abstract class Player(int pos, IGameContext gameContext)
 {
-    public int Position = Pos;
-    public Piece[] Pieces => Array.FindAll(Game.Pieces, p => p.Owner.Position == this.Position);
+    public int Position = pos;
+    public Piece[] Pieces => Array.FindAll(GameContext.GetPieces() ?? [], p => p.OwnerPosition == this.Position);
     public Piece[] PiecesAvailable => Array.FindAll(this.Pieces, p => p.Location == null);
-    public Game Game => game;
+    public IGameContext GameContext => gameContext;
     public abstract void DoMove();
+
+    public string CaptureState() => this is Human ? "human" : "computer";
 }
 
-// TODO a lot of Boards[0] logic in here just to get things working. Needs attention to make Player rules-agnostic and get this logic from Game.
 class Human : Player
 {
     public Cursor Cursor;
-    public Human(int Pos, Game Game) : base (Pos, Game)
+    public Human(int pos, IGameContext gameContext) : base (pos, gameContext)
     {
-        Cursor = new Cursor(0, this);
+        Cursor = new Cursor(0, gameContext, Position);
     }
+
     public override void DoMove()
     {
         Console.ResetColor();
@@ -30,9 +31,9 @@ class Human : Player
         }
         
         // Initialise Cursor
-        this.Cursor.Location = Game.Boards[0].SquaresAvailable[0];
+        this.Cursor.Location = GameContext.GetBoard(0).SquaresAvailable[0];
         this.Cursor.Value = piece.Value;
-        Game.Boards[0].Draw();
+        GameContext.DrawBoards();
         //Only accept valid inputs based on the keystrokes in this array
         ConsoleKey[] validKeys = [ConsoleKey.N, ConsoleKey.M, ConsoleKey.LeftArrow, ConsoleKey.RightArrow, ConsoleKey.UpArrow, ConsoleKey.DownArrow, ConsoleKey.Enter];
         ConsoleKeyInfo key;
@@ -54,21 +55,22 @@ class Human : Player
 
                 if(key.Key == ConsoleKey.Enter)      selected = true;
 
-                Game.Boards[0].Draw();
+                GameContext.DrawBoards();
             }
             else
             {
                 Console.WriteLine("Double check the controls and try navigating with either the arrow keys or n&m.");
             }
         } while (!selected);
-        Square? sq = Game.Boards[0].Squares.FirstOrDefault(x => x.Row == this.Cursor.Location.Row && x.Col == this.Cursor.Location.Col);
+        Square? sq = GameContext.GetBoard(0).Squares.FirstOrDefault(x => x.Row == this.Cursor.Location.Row && x.Col == this.Cursor.Location.Col); // TODO cater for n boards
         //Place Piece
         sq.PlacePiece(piece);
         //remove cursor from the board
         this.Cursor.Location = null;
     }
 }
-class Computer(int Pos, Game Game) : Player(Pos, Game)
+
+class Computer(int pos, IGameContext Game) : Player(pos, Game)
 {
     public override void DoMove() // TODO win logic needs to be owned by the game. We'll need to refactor this out of here and make Computer select from a list of Square provided by the game.
     {
@@ -77,10 +79,10 @@ class Computer(int Pos, Game Game) : Player(Pos, Game)
         Piece? p = null;
 
         //Build a list of lines that have one space free/almost full
-        foreach (Square[] line in Game.Boards[0].Lines!)
+        foreach (Square[] line in GameContext.GetBoard(0).Lines!)
         {
             int countOfFullLines = line.Count(el => el.Value != null);
-            bool isAlmostFull = countOfFullLines+1 == Game.Boards[0].Size;
+            bool isAlmostFull = countOfFullLines+1 == GameContext.GetBoard(0).Size;
 
             if(isAlmostFull) AlmostFullLines.Add(line);
         }
@@ -90,7 +92,7 @@ class Computer(int Pos, Game Game) : Player(Pos, Game)
             foreach (Square[] line in AlmostFullLines)
             {
                 int lineSum = line.Aggregate(0, (acc, el) => el.Value != null ? el.Value.Value + acc : acc);
-                int requires = ((TicTacToe)Game).targetNumber - lineSum; // TODO we can't leave this this way.
+                int requires = ((TicTacToe)GameContext).targetNumber - lineSum; // TODO we can't leave this this way.
 
                 Piece? requiredPiece = this.PiecesAvailable.FirstOrDefault(el => el.Value == requires);
 
@@ -108,11 +110,11 @@ class Computer(int Pos, Game Game) : Player(Pos, Game)
         //if no winning move is found, get available squares, and randomly pick a piece to place in a random square 
         if(sq == null)
         {
-            var availSqurares = Game.Boards[0].SquaresAvailable;
+            var availSqurares = GameContext.GetBoard(0).SquaresAvailable;
             var availPieces = this.PiecesAvailable;
 
             Random rng = new Random();
-            int sqrnum = rng.Next(0, Game.Boards[0].SquaresAvailable.Length - 1);
+            int sqrnum = rng.Next(0, GameContext.GetBoard(0).SquaresAvailable.Length - 1);
             int piecenum = rng.Next(0, this.PiecesAvailable.Length - 1);
 
             sq = availSqurares[sqrnum];

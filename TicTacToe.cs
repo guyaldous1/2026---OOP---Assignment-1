@@ -8,9 +8,8 @@
     {
     }
 
-    public TicTacToe(GameStateMemento state): base (state)
+    public TicTacToe(GameStateMemento state): base(state)
     {
-        // TODO stub for now.
     }
 
     public override void ResolveTurn()
@@ -65,12 +64,12 @@
         for (int i = 0; i < pieceCount; i++)
         {
             int val = i + 1;
-            Player owner = (i % 2 == 0) ? Player1 : Player2;
-            this.Pieces[i] = new Piece(val, owner);
+            int ownerPosition = (i % 2 == 0) ? 1 : 2;
+            this.Pieces[i] = new Piece(val, this, ownerPosition);
         }
     }
 
-    protected override void DrawBoards()
+    public override void DrawBoards()
     {
         this.Boards[0].Draw();
     }
