@@ -1,4 +1,4 @@
-abstract class Game
+abstract class Game : IGameContext
 {
     // Properties - marked as 'null!' because they are initialized in Setup()
     public Player Player1 { get; private set; } = null!;
@@ -13,19 +13,20 @@ abstract class Game
 
     private string gameMode;
 
+    private PlayerFactory playerFactory;
+
     // Expression-bodied properties for cleaner logic
     public Player WhoseTurn => TurnNumber % 2 == 0 ? Player2 : Player1;
 
     public Game()
     {
-        // Constructor is now "Lightweight." 
-        // It only prepares the object, it doesn't run the game.
+        this.playerFactory = new PlayerFactory(this);
     }
 
-    public Game(GameStateMemento state)
+    public Game(GameStateMemento state) : this()
     {
-        GameType = state.GameType;
-        // TODO stub for now.
+        this.Player1 = this.playerFactory.CreateFromState(state.Player1Type, 1);
+        this.Player2 = this.playerFactory.CreateFromState(state.Player2Type, 2);
     }
 
     public void StartGame()
@@ -56,10 +57,11 @@ abstract class Game
             }
         }
 
-        this.Player1 = new Human(1, this);
+
+        this.Player1 = this.playerFactory.CreateHumanPlayer(1);
         bool p2IsHuman = (mode == 1);
         this.gameMode = p2IsHuman ? "HvH" : "HvC";
-        this.Player2 = p2IsHuman ? new Human(2, this) : new Computer(2, this);
+        this.Player2 = p2IsHuman ? this.playerFactory.CreateHumanPlayer(2) : this.playerFactory.CreateComputerPlayer(2);
         
         Console.Clear();
         Console.WriteLine($"-- Game Started: Human v {(p2IsHuman ? "Human" : "Computer")} --");
@@ -75,10 +77,11 @@ abstract class Game
         var state = new GameStateMemento
         {
             GameType = GameType,
-            Mode = this.gameMode,
             BoardSize = this.Boards[0].Size,
             BoardCount = this.Boards.Length,
             CurrentPlayerIndex = WhoseTurn == this.Player1 ? 1 : 2,
+            Player1Type = this.Player1.CaptureState(),
+            Player2Type = this.Player2.CaptureState(),
 
             // TODO serialize history
             //MoveHistory = History.GetAll(),
@@ -86,7 +89,7 @@ abstract class Game
         };
 
         foreach (var board in Boards)
-            state.BoardValues.AddRange(board.Squares.Select(s => s.Value?.Value.ToString() ?? "").ToList());
+            state.BoardValues.AddRange(board.Squares.Select(s => GetPieceValueForSquare(s).ToString() ?? "").ToList());
 
         return state;
     }
@@ -109,19 +112,20 @@ abstract class Game
         }
     }
 
+    public int GetPieceValueForSquare(Square square)
+    {
+        return this.Pieces.FirstOrDefault(p => p.Location == square)?.Value ?? 0;
+    }
+
     public abstract void ResolveTurn();
 
     public abstract void ShowRuleForTurn();
 
+    public abstract void DrawBoards();
+
+    public Board GetBoard(int index = 0) => Boards?[index] ?? null!;
+
+    public Piece[] GetPieces() => Pieces;
+
     protected abstract void InitializeBoards();
-
-    protected abstract void DrawBoards();
-
-    private string GetCommand()
-    {
-        // TODO stub for now
-        Console.Write("Enter command (Enter for next turn)" + Environment.NewLine + "> ");
-        string? command = Console.ReadLine();
-        return string.IsNullOrWhiteSpace(command) ? "turn" : command ;
-    }
 }

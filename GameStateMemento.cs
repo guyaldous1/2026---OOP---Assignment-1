@@ -10,14 +10,14 @@ using System.Text;
 class GameStateMemento
 {
     public string GameType { get; set; } = "";
-    public string Mode { get; set; } = "";       // "HvH" or "HvC"
     public int BoardSize { get; set; }
     public int BoardCount { get; set; }
     // Serialized as flat arrays: boardIndex * rows * cols + row * cols + col
-    public List<string> BoardValues { get; set; } = new();
+    public List<string> BoardValues { get; set; } = new(); // TODO this will be replaced by serialising pieces
     public int CurrentPlayerIndex { get; set; }
-    public List<string> Player1Numbers { get; set; } = new();
-    public List<string> Player2Numbers { get; set; } = new();
-    public List<Piece> MoveHistory { get; set; } = new();
-    public int HistoryPointer { get; set; }
+    public required string Player1Type { get; set; }
+    public required string Player2Type { get; set; }
+
+//TODO    public List<Piece> MoveHistory { get; set; } = new();
+//TODO    public int HistoryPointer { get; set; }
 }
