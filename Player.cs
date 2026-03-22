@@ -8,8 +8,8 @@ abstract class Player(int pos, IGameContext gameContext)
     public Piece[] PiecesAvailable => Array.FindAll(this.Pieces, p => p.Location == null);
     public IGameContext GameContext => gameContext;
     public abstract void DoMove();
-
     public string CaptureState() => this is Human ? "human" : "computer";
+    public ConsoleColor Colour => this.Position % 2 == 0 ? ConsoleColor.Red : ConsoleColor.Green;
 }
 
 class Human : Player

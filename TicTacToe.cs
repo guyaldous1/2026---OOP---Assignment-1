@@ -2,7 +2,7 @@
 {
     public override string GameType => "tictactoe";
 
-    public int targetNumber => Boards[0].Size * (Boards[0].Size * Boards[0].Size + 1) / 2; // TODO this needs to be private after Computer loses its dependency on it.
+    private int targetNumber => Boards[0].Size * (Boards[0].Size * Boards[0].Size + 1) / 2;
 
     public TicTacToe()
     {
@@ -43,9 +43,10 @@
         Console.WriteLine($"The Target Number is {targetNumber}");
     }
 
-    protected override void InitializeBoards()
+    protected override void InitializeBoards()//TODO refactor to have board creation factory?
     {
         int size = 0;
+        int boardCount = 1;
         while (size < 2 || size > 10)
         {
             Console.WriteLine("-- Enter board size (2-10):");
@@ -56,10 +57,10 @@
         }
 
         this.Boards = new Board[1];
-        this.Boards[0] = new Board(size, this, 0);
+        this.Boards[0] = new Board(size, 0);
 
         // Create pieces and assign players
-        int pieceCount = size * size;
+        int pieceCount = size * size * boardCount;
         this.Pieces = new Piece[pieceCount];
         for (int i = 0; i < pieceCount; i++)
         {

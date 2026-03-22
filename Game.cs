@@ -130,20 +130,26 @@ abstract class Game : IGameContext
 
     public abstract void ShowRuleForTurn();
 
+    private void DrawPlayerPieces(Player player)
+    {
+        Console.ResetColor();
+        Console.ForegroundColor = player.Colour;
+        Console.Write($"Player 2's Remaining Pieces:");
+        foreach (Piece p in player.PiecesAvailable)
+        {
+            Console.Write($" {p.Value}");
+        }
+        Console.ResetColor();
+        Console.Write('\n');
+    }
+
     public void DrawBoards()
     {
         Console.Clear();
         Console.WriteLine($"Turn {this.TurnNumber}. It's Player {this.WhoseTurn.Position}'s Turn");
         ShowRuleForTurn();
     
-        //write player 1 pieces
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.Write($"Player 1's Remaining Pieces:");
-        foreach (Piece p in this.Player1.PiecesAvailable)
-        {
-            Console.Write($" {p.Value}");
-        }
-        Console.Write('\n');
+        DrawPlayerPieces(Player1);
         
         //write each board layout
         foreach (Board board in this.Boards)
@@ -152,7 +158,7 @@ abstract class Game : IGameContext
             {
                 if(WhoseTurn is Human human && human.Cursor.Location == board.Squares[i])
                 {
-                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.ForegroundColor = WhoseTurn.Colour;
                     Console.Write($"({human.Cursor.Value})");
                 }
                 else if(!board.Squares[i].IsOccupied)
@@ -170,16 +176,8 @@ abstract class Game : IGameContext
             Console.Write("\n");
         }
         
-        //write player 2 pieces
-        Console.ResetColor();
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.Write($"Player 2's Remaining Pieces:");
-        foreach (Piece p in Player2.PiecesAvailable)
-        {
-            Console.Write($" {p.Value}");
-        }
-        Console.ResetColor();
-        Console.Write('\n');
+        DrawPlayerPieces(Player2);
+        
     }
 
     public Board GetBoard(int index = 0) => Boards?[index] ?? null!;

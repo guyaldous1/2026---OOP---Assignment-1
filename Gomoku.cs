@@ -1,12 +1,12 @@
-﻿class Notakto : Game
+﻿class Gomoku : Game
 {
-    public override string GameType => "notakto";
+    public override string GameType => "gomoku";
 
-    public Notakto()
+    public Gomoku()
     {
     }
 
-    public Notakto(GameStateMemento state): base(state)
+    public Gomoku(GameStateMemento state): base(state)
     {
     }
 
@@ -40,9 +40,9 @@
 
     protected override void InitializeBoards()
     {
-        //always make three boards of size 3
-        int size = 3;
-        int boardCount = 3;
+        //always make 1 board of size 15
+        int size = 15;
+        int boardCount = 1;
         
         this.Boards = new Board[boardCount];
 
@@ -56,7 +56,7 @@
         this.Pieces = new Piece[pieceCount];
         for (int i = 0; i < pieceCount; i++)
         {
-            string val = "X";
+            string val = (i % 2 == 0) ? "X" : "O";
             int ownerPosition = (i % 2 == 0) ? 1 : 2;
             this.Pieces[i] = new Piece(val, this, ownerPosition);
         }
