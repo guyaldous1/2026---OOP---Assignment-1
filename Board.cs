@@ -23,13 +23,10 @@ class Board
         }
     }
     public List<Square[]> FullLines => Lines.Where(line => line.All(square => square.IsOccupied)).ToList();
-
-    private Game _game;
-    public Board(int setSize, Game Game, int boardID)
+    public Board(int setSize, int boardID)
     {
         this.Size = setSize;
         this.Squares = new Square[Size * Size];
-        this._game = Game;
         this.BoardID = boardID;
 
         for (int row = 0; row < Size; row++)

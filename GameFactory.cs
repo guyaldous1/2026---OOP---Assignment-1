@@ -15,7 +15,7 @@ static class GameFactory
         {
             "tictactoe" => new TicTacToe(),
             "notakto" => new Notakto(),
-//TODO                "gomoku" => new Gomoku(),
+            "gomoku" => new Gomoku(),
             _ => throw new ArgumentException($"Unknown game type: {type}")
         };
     }
@@ -26,7 +26,7 @@ static class GameFactory
         {
             "tictactoe" => new TicTacToe(state),
             "notakto" => new Notakto(state),
-//TODO                "gomoku" => new Gomoku(state),
+            "gomoku" => new Gomoku(state),
             _ => throw new ArgumentException($"Unknown game type: {state.GameType}")
         };
 

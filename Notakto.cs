@@ -22,7 +22,7 @@
         if (boardsWithFullLines.Count == 3)
         {
             this.Finished = true;
-            Console.WriteLine($"Player {this.WhoseTurn.Position} Wins!");
+            Console.WriteLine($"Player {this.WhoseNotTurn.Position} Wins!");
             return;
         }
 
@@ -38,32 +38,16 @@
         Console.WriteLine($"Place an X to be the first to create a row of 3 in each board");
     }
 
-    protected override void InitializeBoards()
+    protected override void InitializeGameBoards()
     {
         //always make three boards of size 3
         int size = 3;
-        int boards = 3;
-        
-        this.Boards = new Board[]{ 
-            new Board(size, this, 0), 
-            new Board(size, this, 1), 
-            new Board(size, this, 2) 
-        };
+        int boardCount = 3;
 
-        // Create pieces and assign players
-        int pieceCount = size * size * boards;
-        this.Pieces = new Piece[pieceCount];
-        for (int i = 0; i < pieceCount; i++)
-        {
-            string val = "X";
-            int ownerPosition = (i % 2 == 0) ? 1 : 2;
-            this.Pieces[i] = new Piece(val, this, ownerPosition);
-        }
+        InitializeBoards(size, boardCount, "x");
     }
     public override bool CalculateComMove(Computer com)
     {
-        Square? sq = null;
-        Piece? p = null;
 
         //Build a list of lines that have one space free/almost full        
         var AlmostFullLines = GetBoards()
@@ -83,12 +67,10 @@
         if (AlmostFullLines.Count > 0 && boardsWithFullLines.Count == 2 && boardIDWithWinningLine != null && winningLine != null)
         {
             
-            Square winningSpace = winningLine.First(space => !space.IsOccupied);
+            Square winningSpace = winningLine.First(space => !space.IsOccupied);           
+            Piece piece = com.PiecesAvailable.First();
 
-            sq = winningSpace;
-            p = com.PiecesAvailable.First();
-
-            p.Place(sq);
+            piece.Place(winningSpace);
             
             return true;
         }

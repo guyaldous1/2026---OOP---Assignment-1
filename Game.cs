@@ -20,6 +20,7 @@ abstract class Game : IGameContext
 
     // Expression-bodied properties for cleaner logic
     public Player WhoseTurn => TurnNumber % 2 == 0 ? Player2 : Player1;
+    public Player WhoseNotTurn => TurnNumber % 2 == 0 ? Player1 : Player2;
 
     public Game()
     {
@@ -36,7 +37,7 @@ abstract class Game : IGameContext
     {
         Console.Clear();
         InitializePlayers();
-        InitializeBoards();
+        InitializeGameBoards();
     }
 
     public void EndGame()
@@ -117,7 +118,7 @@ abstract class Game : IGameContext
 
     public string GetPieceValueForSquare(Square square)
     {
-        return this.Pieces.FirstOrDefault(p => p.Location == square)?.Value ?? "0";
+        return this.Pieces.FirstOrDefault(p => p.Location == square)?.Value ?? "-";
     }
 
     public int GetPieceValueForSquareAsInt(Square square)
@@ -130,21 +131,29 @@ abstract class Game : IGameContext
 
     public abstract void ShowRuleForTurn();
 
+    private void DrawPlayerPieces(Player player)
+    {
+        Console.ResetColor();
+        Console.ForegroundColor = player.Colour;
+        Console.Write($"Player {player.Position}'s Remaining Pieces:");
+        foreach (Piece p in player.PiecesAvailable)
+        {
+            Console.Write($" {p.Value}");
+        }
+        Console.ResetColor();
+        Console.Write('\n');
+    }
+
     public void DrawBoards()
     {
         Console.Clear();
         Console.WriteLine($"Turn {this.TurnNumber}. It's Player {this.WhoseTurn.Position}'s Turn");
         ShowRuleForTurn();
     
-        //write player 1 pieces
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.Write($"Player 1's Remaining Pieces:");
-        foreach (Piece p in this.Player1.PiecesAvailable)
-        {
-            Console.Write($" {p.Value}");
-        }
-        Console.Write('\n');
-        
+        DrawPlayerPieces(Player1);
+
+        Console.Write("\n");
+
         //write each board layout
         foreach (Board board in this.Boards)
         {
@@ -152,7 +161,7 @@ abstract class Game : IGameContext
             {
                 if(WhoseTurn is Human human && human.Cursor.Location == board.Squares[i])
                 {
-                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.ForegroundColor = WhoseTurn.Colour;
                     Console.Write($"({human.Cursor.Value})");
                 }
                 else if(!board.Squares[i].IsOccupied)
@@ -170,16 +179,8 @@ abstract class Game : IGameContext
             Console.Write("\n");
         }
         
-        //write player 2 pieces
-        Console.ResetColor();
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.Write($"Player 2's Remaining Pieces:");
-        foreach (Piece p in Player2.PiecesAvailable)
-        {
-            Console.Write($" {p.Value}");
-        }
-        Console.ResetColor();
-        Console.Write('\n');
+        DrawPlayerPieces(Player2);
+        
     }
 
     public Board GetBoard(int index = 0) => Boards?[index] ?? null!;
@@ -190,7 +191,37 @@ abstract class Game : IGameContext
 
     public Square[] AllAvailableSquares => GetBoards().SelectMany(board => board.SquaresAvailable).ToArray();
     public List<Square[]> AllFullLines => GetBoards().SelectMany(board => board.FullLines).ToList();
-    protected abstract void InitializeBoards();
+
+    protected abstract void InitializeGameBoards();
+    protected void InitializeBoards(int size, int boardCount, string pieceType)
+    {
+        //create boards
+        Boards = new Board[boardCount];
+
+        for (int i = 0; i < boardCount; i++)
+        {
+            Boards[i] = new Board(size, i);
+        }
+
+        // Create pieces and assign players
+        int pieceCount = size * size * boardCount;
+        Pieces = new Piece[pieceCount];
+
+        for (int i = 0; i < pieceCount; i++)
+        {
+            string val = pieceType switch
+            {
+                "xo"      => (i % 2 == 0) ? "X" : "O",
+                "numbers" => (i + 1).ToString(),
+                "x"       => "X",
+                _         => throw new ArgumentException($"Unsupported piece type: {pieceType}")
+            };
+
+            int ownerPosition = (i % 2 == 0) ? 1 : 2;
+            Pieces[i] = new Piece(val, this, ownerPosition);
+        }
+        
+    }
     public abstract bool CalculateComMove(Computer com);
 
     public string PlayerMoveInstructions()

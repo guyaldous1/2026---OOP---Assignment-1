@@ -2,7 +2,7 @@
 {
     public override string GameType => "tictactoe";
 
-    public int targetNumber => Boards[0].Size * (Boards[0].Size * Boards[0].Size + 1) / 2; // TODO this needs to be private after Computer loses its dependency on it.
+    private int targetNumber => Boards[0].Size * (Boards[0].Size * Boards[0].Size + 1) / 2;
 
     public TicTacToe()
     {
@@ -43,9 +43,10 @@
         Console.WriteLine($"The Target Number is {targetNumber}");
     }
 
-    protected override void InitializeBoards()
+    protected override void InitializeGameBoards()
     {
         int size = 0;
+        int boardCount = 1;
         while (size < 2 || size > 10)
         {
             Console.WriteLine("-- Enter board size (2-10):");
@@ -55,18 +56,7 @@
             }
         }
 
-        this.Boards = new Board[1];
-        this.Boards[0] = new Board(size, this, 0);
-
-        // Create pieces and assign players
-        int pieceCount = size * size;
-        this.Pieces = new Piece[pieceCount];
-        for (int i = 0; i < pieceCount; i++)
-        {
-            int val = i + 1;
-            int ownerPosition = (i % 2 == 0) ? 1 : 2;
-            this.Pieces[i] = new Piece(val.ToString(), this, ownerPosition);
-        }
+        InitializeBoards(size, boardCount, "numbers");
     }
     public override bool CalculateComMove(Computer com)
     {
