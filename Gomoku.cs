@@ -38,28 +38,13 @@
         Console.WriteLine($"Place an X to be the first to create a row of 3 in each board");
     }
 
-    protected override void InitializeBoards()
+    protected override void InitializeGameBoards()
     {
         //always make 1 board of size 15
         int size = 15;
         int boardCount = 1;
-        
-        this.Boards = new Board[boardCount];
 
-        for (int i = 0; i < boardCount; i++)
-        {
-            this.Boards[i] = new Board(size, i);
-        }
-
-        // Create pieces and assign players
-        int pieceCount = size * size * boardCount;
-        this.Pieces = new Piece[pieceCount];
-        for (int i = 0; i < pieceCount; i++)
-        {
-            string val = (i % 2 == 0) ? "X" : "O";
-            int ownerPosition = (i % 2 == 0) ? 1 : 2;
-            this.Pieces[i] = new Piece(val, this, ownerPosition);
-        }
+        InitializeBoards(size, boardCount, "xo");
     }
     public override bool CalculateComMove(Computer com)
     {

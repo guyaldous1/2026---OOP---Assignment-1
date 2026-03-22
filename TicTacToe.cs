@@ -43,7 +43,7 @@
         Console.WriteLine($"The Target Number is {targetNumber}");
     }
 
-    protected override void InitializeBoards()//TODO refactor to have board creation factory?
+    protected override void InitializeGameBoards()
     {
         int size = 0;
         int boardCount = 1;
@@ -56,18 +56,7 @@
             }
         }
 
-        this.Boards = new Board[1];
-        this.Boards[0] = new Board(size, 0);
-
-        // Create pieces and assign players
-        int pieceCount = size * size * boardCount;
-        this.Pieces = new Piece[pieceCount];
-        for (int i = 0; i < pieceCount; i++)
-        {
-            int val = i + 1;
-            int ownerPosition = (i % 2 == 0) ? 1 : 2;
-            this.Pieces[i] = new Piece(val.ToString(), this, ownerPosition);
-        }
+        InitializeBoards(size, boardCount, "numbers");
     }
     public override bool CalculateComMove(Computer com)
     {

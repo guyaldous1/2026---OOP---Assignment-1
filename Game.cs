@@ -36,7 +36,7 @@ abstract class Game : IGameContext
     {
         Console.Clear();
         InitializePlayers();
-        InitializeBoards();
+        InitializeGameBoards();
     }
 
     public void EndGame()
@@ -188,7 +188,37 @@ abstract class Game : IGameContext
 
     public Square[] AllAvailableSquares => GetBoards().SelectMany(board => board.SquaresAvailable).ToArray();
     public List<Square[]> AllFullLines => GetBoards().SelectMany(board => board.FullLines).ToList();
-    protected abstract void InitializeBoards();
+
+    protected abstract void InitializeGameBoards();
+    protected void InitializeBoards(int size, int boardCount, string pieceType)
+    {
+        //create boards
+        Boards = new Board[boardCount];
+
+        for (int i = 0; i < boardCount; i++)
+        {
+            Boards[i] = new Board(size, i);
+        }
+
+        // Create pieces and assign players
+        int pieceCount = size * size * boardCount;
+        Pieces = new Piece[pieceCount];
+
+        for (int i = 0; i < pieceCount; i++)
+        {
+            string val = pieceType switch
+            {
+                "xo"      => (i % 2 == 0) ? "X" : "O",
+                "numbers" => (i + 1).ToString(),
+                "x"       => "X",
+                _         => throw new ArgumentException($"Unsupported piece type: {pieceType}")
+            };
+
+            int ownerPosition = (i % 2 == 0) ? 1 : 2;
+            Pieces[i] = new Piece(val, this, ownerPosition);
+        }
+        
+    }
     public abstract bool CalculateComMove(Computer com);
 
     public string PlayerMoveInstructions()
