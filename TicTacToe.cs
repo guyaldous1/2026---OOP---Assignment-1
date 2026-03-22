@@ -68,4 +68,41 @@
             this.Pieces[i] = new Piece(val.ToString(), this, ownerPosition);
         }
     }
+    public override bool CalculateComMove(Computer com)
+    {
+        Square? sq = null;
+        Piece? p = null;
+
+        //Build a list of lines that have one space free/almost full        
+        var AlmostFullLines = GetBoards()
+        .SelectMany(board => board.Lines!)
+        .Where(line => line.Count(sq => sq.IsOccupied) == line.Length - 1)
+        .ToList();
+        
+        //check all available spots for a winning move
+        if (AlmostFullLines.Count > 0)
+        {
+            foreach (Square[] line in AlmostFullLines)
+            {
+                int lineSum = line.Aggregate(0, (acc, el) => el.IsOccupied ? GetPieceValueForSquareAsInt(el) + acc : acc);
+                int requires = targetNumber - lineSum;
+
+                Piece? requiredPiece = com.PiecesAvailable.FirstOrDefault(el => int.Parse(el.Value) == requires);
+
+                if(requiredPiece != null)
+                {
+                    Square emptySpace = line.First(el => !el.IsOccupied);
+
+                    sq = emptySpace;
+                    p = requiredPiece;
+
+                    p.Place(sq);
+
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 }

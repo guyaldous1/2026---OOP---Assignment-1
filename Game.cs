@@ -190,6 +190,6 @@ abstract class Game : IGameContext
 
     public Square[] AllAvailableSquares => GetBoards().SelectMany(board => board.SquaresAvailable).ToArray();
     public List<Square[]> AllFullLines => GetBoards().SelectMany(board => board.FullLines).ToList();
-
     protected abstract void InitializeBoards();
+    public abstract bool CalculateComMove(Computer com);
 }

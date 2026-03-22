@@ -76,8 +76,7 @@ class Human : Player
         var currentBoard = this.Cursor.Location.BoardID;    
         Square? sq = GameContext.GetBoard(currentBoard).Squares.FirstOrDefault(x => x.Row == this.Cursor.Location.Row && x.Col == this.Cursor.Location.Col);
         //Place Piece
-        piece.Location = sq;
-        sq.IsOccupied = true;
+        piece.Place(sq);
         //remove cursor from the board
         this.Cursor.Location = null;
     }
@@ -85,63 +84,22 @@ class Human : Player
 
 class Computer(int pos, IGameContext Game) : Player(pos, Game)
 {
-    public override void DoMove(Game game) // TODO win logic needs to be owned by the game. We'll need to refactor this out of here and make Computer select from a list of Square provided by the game.
-    {
-        Square? sq = null;
-        List<Square[]> AlmostFullLines = [];
-        Piece? p = null;
+    public override void DoMove(Game game){
+       bool FoundAWinner = game.CalculateComMove(this);
 
-        //Build a list of lines that have one space free/almost full
-        foreach(Board board in GameContext.GetBoards())
-        {
-            foreach (Square[] line in board.Lines!)
-            {
-                int countOfFullLines = line.Count(el => el.IsOccupied);
-                bool isAlmostFull = countOfFullLines+1 == board.Size;
-
-                if(isAlmostFull) AlmostFullLines.Add(line);
-            }
-        }
-        
-        //check all available spots for a winning move
-        //TODO need to make the winning move selection work for all boards
-        // if (AlmostFullLines.Count > 0) commented this out for now
-        if(false)
-        {
-            foreach (Square[] line in AlmostFullLines)
-            {
-                int lineSum = line.Aggregate(0, (acc, el) => el.IsOccupied ? this.GameContext.GetPieceValueForSquareAsInt(el) + acc : acc);
-                int requires = ((TicTacToe)GameContext).targetNumber - lineSum; // TODO we can't leave this this way.
-
-                Piece? requiredPiece = this.PiecesAvailable.FirstOrDefault(el => int.Parse(el.Value) == requires);
-
-                if(requiredPiece != null)
-                {
-                    Square emptySpace = line.First(el => !el.IsOccupied);
-
-                    sq = emptySpace;
-                    p = requiredPiece;
-                    // don't check lines if winning move is found
-                    break;
-                }
-            }
-        }
-
-        //if no winning move is found, get available squares, and randomly pick a piece to place in a random square 
-        if(sq == null)
+       //if no winning move is found, get available squares, and randomly pick a piece to place in a random square 
+        if(!FoundAWinner)
         {
             var availSqurares = GameContext.AllAvailableSquares;
-            var availPieces = this.PiecesAvailable;
 
             Random rng = new Random();
-            int sqrnum = rng.Next(0, availSqurares.Length - 1);
-            int piecenum = rng.Next(0, this.PiecesAvailable.Length - 1);
+            int sqrnum = rng.Next(0, availSqurares.Length);
+            int piecenum = rng.Next(0, PiecesAvailable.Length);
 
-            sq = availSqurares[sqrnum];
-            p = availPieces[piecenum];
+            Square sq = availSqurares[sqrnum];
+            Piece p = PiecesAvailable[piecenum];
+
+            p.Place(sq);
         }
-        //set a space after resolution of the above
-        p.Location = sq;
-        sq.IsOccupied = true;
     }
 }

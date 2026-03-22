@@ -14,8 +14,6 @@
     {
         DrawBoards();
 
-        //TODO end of turn logic for notakto
-
         List<int> boardsWithFullLines = AllFullLines
             .Select(line => line[0].BoardID)
             .Distinct()                      
@@ -61,5 +59,40 @@
             int ownerPosition = (i % 2 == 0) ? 1 : 2;
             this.Pieces[i] = new Piece(val, this, ownerPosition);
         }
+    }
+    public override bool CalculateComMove(Computer com)
+    {
+        Square? sq = null;
+        Piece? p = null;
+
+        //Build a list of lines that have one space free/almost full        
+        var AlmostFullLines = GetBoards()
+        .SelectMany(board => board.Lines!)
+        .Where(line => line.Count(sq => sq.IsOccupied) == line.Length - 1)
+        .ToList();
+        
+        List<int> boardsWithFullLines = AllFullLines
+            .Select(line => line[0].BoardID)
+            .Distinct()                      
+            .ToList();
+
+        var boardIDWithWinningLine = GetBoards().FirstOrDefault(board => !boardsWithFullLines.Contains(board.BoardID));
+
+        var winningLine = AlmostFullLines.FirstOrDefault(line => line[0].BoardID == boardIDWithWinningLine.BoardID);
+
+        if (AlmostFullLines.Count > 0 && boardsWithFullLines.Count == 2 && boardIDWithWinningLine != null && winningLine != null)
+        {
+            
+            Square winningSpace = winningLine.First(space => !space.IsOccupied);
+
+            sq = winningSpace;
+            p = com.PiecesAvailable.First();
+
+            p.Place(sq);
+            
+            return true;
+        }
+
+        return false;
     }
 }
