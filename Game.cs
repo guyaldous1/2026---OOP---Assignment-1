@@ -1,3 +1,6 @@
+using System.ComponentModel.Design;
+using System.Reflection.Metadata;
+
 abstract class Game : IGameContext
 {
     // Properties - marked as 'null!' because they are initialized in Setup()
@@ -11,7 +14,7 @@ abstract class Game : IGameContext
 
     public virtual string GameType { get; }
 
-    private string gameMode;
+    public string PlayerGameMode { get; private set; }
 
     private PlayerFactory playerFactory;
 
@@ -60,7 +63,7 @@ abstract class Game : IGameContext
 
         this.Player1 = this.playerFactory.CreateHumanPlayer(1);
         bool p2IsHuman = (mode == 1);
-        this.gameMode = p2IsHuman ? "HvH" : "HvC";
+        this.PlayerGameMode = p2IsHuman ? "HvH" : "HvC";
         this.Player2 = p2IsHuman ? this.playerFactory.CreateHumanPlayer(2) : this.playerFactory.CreateComputerPlayer(2);
         
         Console.Clear();
@@ -89,7 +92,7 @@ abstract class Game : IGameContext
         };
 
         foreach (var board in Boards)
-            state.BoardValues.AddRange(board.Squares.Select(s => GetPieceValueForSquare(s).ToString() ?? "").ToList());
+            state.BoardValues.AddRange(board.Squares.Select(s => GetPieceValueForSquareAsInt(s).ToString() ?? "").ToList());
 
         return state;
     }
@@ -112,20 +115,95 @@ abstract class Game : IGameContext
         }
     }
 
-    public int GetPieceValueForSquare(Square square)
+    public string GetPieceValueForSquare(Square square)
     {
-        return this.Pieces.FirstOrDefault(p => p.Location == square)?.Value ?? 0;
+        return this.Pieces.FirstOrDefault(p => p.Location == square)?.Value ?? "0";
+    }
+
+    public int GetPieceValueForSquareAsInt(Square square)
+    {
+        var piece = this.Pieces.FirstOrDefault(p => p.Location == square);
+        return piece != null ? int.Parse(piece.Value) : 0;
     }
 
     public abstract void ResolveTurn();
 
     public abstract void ShowRuleForTurn();
 
-    public abstract void DrawBoards();
+    public void DrawBoards()
+    {
+        Console.Clear();
+        Console.WriteLine($"Turn {this.TurnNumber}. It's Player {this.WhoseTurn.Position}'s Turn");
+        ShowRuleForTurn();
+    
+        //write player 1 pieces
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.Write($"Player 1's Remaining Pieces:");
+        foreach (Piece p in this.Player1.PiecesAvailable)
+        {
+            Console.Write($" {p.Value}");
+        }
+        Console.Write('\n');
+        
+        //write each board layout
+        foreach (Board board in this.Boards)
+        {
+            for (int i = 0; i < board.Squares.Length; i++)
+            {
+                if(WhoseTurn is Human human && human.Cursor.Location == board.Squares[i])
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.Write($"({human.Cursor.Value})");
+                }
+                else if(!board.Squares[i].IsOccupied)
+                {
+                    Console.ResetColor();
+                    Console.Write($"( )");
+                }
+                else
+                {   
+                    Console.ResetColor();
+                    Console.Write($"({GetPieceValueForSquare(board.Squares[i])})");
+                }
+                if((i + 1) % board.Size == 0) Console.Write("\n");
+            }
+            Console.Write("\n");
+        }
+        
+        //write player 2 pieces
+        Console.ResetColor();
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.Write($"Player 2's Remaining Pieces:");
+        foreach (Piece p in Player2.PiecesAvailable)
+        {
+            Console.Write($" {p.Value}");
+        }
+        Console.ResetColor();
+        Console.Write('\n');
+    }
 
     public Board GetBoard(int index = 0) => Boards?[index] ?? null!;
 
     public Piece[] GetPieces() => Pieces;
 
+    public Board[] GetBoards() => Boards;
+
+    public Square[] AllAvailableSquares => GetBoards().SelectMany(board => board.SquaresAvailable).ToArray();
+    public List<Square[]> AllFullLines => GetBoards().SelectMany(board => board.FullLines).ToList();
     protected abstract void InitializeBoards();
+    public abstract bool CalculateComMove(Computer com);
+
+    public string PlayerMoveInstructions()
+    {
+        string MoveInstructions = $"Player {WhoseTurn.Position}, use the arrow keys to navigate the remaining spaces and press enter to select one"
+        + $"\nIf the space you want to use is inaccessible with the arrow keys, use the n and m keys to cycle through available spaces";
+        
+        if(GameType == "notakto")
+        {
+            MoveInstructions += $"\nYou can use the number keys 1,2 or 3 to navigate to alternate boards if the game type requires";
+        }
+
+        return MoveInstructions;
+    }
+                
 }

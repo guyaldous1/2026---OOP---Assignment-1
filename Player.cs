@@ -1,4 +1,6 @@
 
+using System.Diagnostics;
+
 abstract class Player(int pos, IGameContext gameContext)
 {
     public int Position = pos;
@@ -16,18 +18,19 @@ class Human : Player
 
     public Human(int pos, IGameContext gameContext) : base (pos, gameContext)
     {
-        Cursor = new Cursor(0, gameContext, Position);
+        Cursor = new Cursor("0", gameContext, Position);
     }
 
     public override void DoMove()
     {
         Console.ResetColor();
-        //Select A Piece
-        Piece? piece = null;
+        //Select A Piece or force one for non neumerical games
+        Piece? piece = GameContext.GameType != "tictactoe" ? PiecesAvailable.FirstOrDefault() : null;
         while (piece == null)
         {
             Console.WriteLine($"Player {this.Position}, enter the number of the piece you'd like to use and press enter to confirm:");
-            if (int.TryParse(Console.ReadLine(), out int val)) piece = PiecesAvailable.FirstOrDefault(x => x.Value == val);
+            string? input = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(input)) { piece = PiecesAvailable.FirstOrDefault(x => x.Value == input); }
             if (piece == null) Console.WriteLine($"That's not a valid piece, try again Player {this.Position}");
         }
         
@@ -36,13 +39,12 @@ class Human : Player
         this.Cursor.Value = piece.Value;
         GameContext.DrawBoards();
         //Only accept valid inputs based on the keystrokes in this array
-        ConsoleKey[] validKeys = [ConsoleKey.N, ConsoleKey.M, ConsoleKey.LeftArrow, ConsoleKey.RightArrow, ConsoleKey.UpArrow, ConsoleKey.DownArrow, ConsoleKey.Enter];
+        ConsoleKey[] validKeys = [ConsoleKey.D1, ConsoleKey.D2, ConsoleKey.D3, ConsoleKey.N, ConsoleKey.M, ConsoleKey.LeftArrow, ConsoleKey.RightArrow, ConsoleKey.UpArrow, ConsoleKey.DownArrow, ConsoleKey.Enter];
         ConsoleKeyInfo key;
         bool selected = false;
         do
         {
-            Console.WriteLine($"Player {this.Position}, use the arrow keys to navigate the remaining spaces and press enter to select one");
-            Console.WriteLine($"If the space you want to use is inaccessible with the arrow keys, use the n and m keys to cycle through available spaces");
+            Console.Write(GameContext.PlayerMoveInstructions());
 
             key = Console.ReadKey(true);
             if (validKeys.Contains(key.Key)){
@@ -54,6 +56,11 @@ class Human : Player
                 if(key.Key == ConsoleKey.N) this.Cursor.MoveLocation("prev");
                 if(key.Key == ConsoleKey.M) this.Cursor.MoveLocation("next");
 
+                //move boards with numbers keys if possible
+                if(key.Key == ConsoleKey.D1) this.Cursor.MoveBoard(0);
+                if(key.Key == ConsoleKey.D2 && GameContext.GetBoards().Length > 1) this.Cursor.MoveBoard(1);
+                if(key.Key == ConsoleKey.D3 && GameContext.GetBoards().Length > 1) this.Cursor.MoveBoard(2);
+
                 if(key.Key == ConsoleKey.Enter)      selected = true;
 
                 GameContext.DrawBoards();
@@ -63,10 +70,11 @@ class Human : Player
                 Console.WriteLine("Double check the controls and try navigating with either the arrow keys or n&m.");
             }
         } while (!selected);
-        Square? sq = GameContext.GetBoard(0).Squares.FirstOrDefault(x => x.Row == this.Cursor.Location.Row && x.Col == this.Cursor.Location.Col); // TODO cater for n boards
+
+        var currentBoard = this.Cursor.Location.BoardID;    
+        Square? sq = GameContext.GetBoard(currentBoard).Squares.FirstOrDefault(x => x.Row == this.Cursor.Location.Row && x.Col == this.Cursor.Location.Col);
         //Place Piece
-        piece.Location = sq;
-        sq.IsOccupied = true;
+        piece.Place(sq);
         //remove cursor from the board
         this.Cursor.Location = null;
     }
@@ -74,56 +82,22 @@ class Human : Player
 
 class Computer(int pos, IGameContext Game) : Player(pos, Game)
 {
-    public override void DoMove() // TODO win logic needs to be owned by the game. We'll need to refactor this out of here and make Computer select from a list of Square provided by the game.
-    {
-        Square? sq = null;
-        List<Square[]> AlmostFullLines = [];
-        Piece? p = null;
+    public override void DoMove(){
+       bool FoundAWinner = GameContext.CalculateComMove(this);
 
-        //Build a list of lines that have one space free/almost full
-        foreach (Square[] line in GameContext.GetBoard(0).Lines!)
+       //if no winning move is found, get available squares, and randomly pick a piece to place in a random square 
+        if(!FoundAWinner)
         {
-            int countOfFullLines = line.Count(el => el.IsOccupied);
-            bool isAlmostFull = countOfFullLines+1 == GameContext.GetBoard(0).Size;
-
-            if(isAlmostFull) AlmostFullLines.Add(line);
-        }
-        //check all available spots for a winning move
-        if (AlmostFullLines.Count > 0)
-        {
-            foreach (Square[] line in AlmostFullLines)
-            {
-                int lineSum = line.Aggregate(0, (acc, el) => el.IsOccupied ? this.GameContext.GetPieceValueForSquare(el) + acc : acc);
-                int requires = ((TicTacToe)GameContext).targetNumber - lineSum; // TODO we can't leave this this way.
-
-                Piece? requiredPiece = this.PiecesAvailable.FirstOrDefault(el => el.Value == requires);
-
-                if(requiredPiece != null)
-                {
-                    Square emptySpace = line.First(el => !el.IsOccupied);
-
-                    sq = emptySpace;
-                    p = requiredPiece;
-                    // don't check lines if winning move is found
-                    break;
-                }
-            }
-        }
-        //if no winning move is found, get available squares, and randomly pick a piece to place in a random square 
-        if(sq == null)
-        {
-            var availSqurares = GameContext.GetBoard(0).SquaresAvailable;
-            var availPieces = this.PiecesAvailable;
+            var availSqurares = GameContext.AllAvailableSquares;
 
             Random rng = new Random();
-            int sqrnum = rng.Next(0, GameContext.GetBoard(0).SquaresAvailable.Length - 1);
-            int piecenum = rng.Next(0, this.PiecesAvailable.Length - 1);
+            int sqrnum = rng.Next(0, availSqurares.Length);
+            int piecenum = rng.Next(0, PiecesAvailable.Length);
 
-            sq = availSqurares[sqrnum];
-            p = availPieces[piecenum];
+            Square sq = availSqurares[sqrnum];
+            Piece p = PiecesAvailable[piecenum];
+
+            p.Place(sq);
         }
-        //set a space after resolution of the above
-        p.Location = sq;
-        sq.IsOccupied = true;
     }
 }

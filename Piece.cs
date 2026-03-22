@@ -1,21 +1,28 @@
-class Piece(int val, IGameContext gameContext, int ownerPosition)
+using Microsoft.VisualBasic;
+
+class Piece(string val, IGameContext gameContext, int ownerPosition)
 {
     protected IGameContext GameContext = gameContext;
-
-    public int Value = val; // TODO this will need to become a string/char (or even an object)
-
-    public Square? Location { get; set; }
-
+    public string Value = val;
+    public Square? Location { get; private set; }
     public int OwnerPosition = ownerPosition;
+
+    public void Place(Square sq)
+    {
+        Location = sq;
+        sq.IsOccupied = true;
+    }
 }
 
-class Cursor(int val, IGameContext gameContext, int ownerPosition) : Piece(val, gameContext, ownerPosition)
+class Cursor(string val, IGameContext gameContext, int ownerPosition) : Piece(val, gameContext, ownerPosition)
 {
     private static readonly string[] ValidDirections = ["left", "right", "up", "down", "next", "prev"];
+    public Square? Location { get; set; }
     public void MoveLocation(string direction)
     {
         if (!ValidDirections.Contains(direction)) return;
-        var Board = this.GameContext.GetBoard(0); // TODO this will need to become board count agnostic
+        var currentBoard = this.Location.BoardID;
+        var Board = this.GameContext.GetBoard(currentBoard); 
         int cur = Array.IndexOf(Board.SquaresAvailable, this.Location);
         // 1. Get available squares in relevant row or column 2. Filter by are greater or less than current position based on direction selected 3. orders them by size based on direction selected 4. set the first available as the new square
         Square? moveTo = direction switch {
@@ -30,5 +37,17 @@ class Cursor(int val, IGameContext gameContext, int ownerPosition) : Piece(val, 
         if (moveTo != null) this.Location = moveTo;
         //Catch out of index for next/prev
         else if (direction is "next" or "prev") Console.WriteLine("That would take you off the board, try again.");
+    }
+
+     public void MoveBoard(int boardID)
+    {
+        var currentBoard = this.Location.BoardID;
+        if(currentBoard == boardID) return;
+
+        var NewBoard = this.GameContext.GetBoard(boardID);
+
+        var FirstSquare = NewBoard.SquaresAvailable[0];
+
+        this.Location = FirstSquare;
     }
 }

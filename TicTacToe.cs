@@ -21,7 +21,7 @@
             bool isFull = Array.TrueForAll(line, el => el.IsOccupied);
             if (!isFull) continue;
 
-            int lineSum = line.Sum(GetPieceValueForSquare);
+            int lineSum = line.Sum(GetPieceValueForSquareAsInt);
 
             if (lineSum == this.targetNumber)
             {
@@ -56,7 +56,7 @@
         }
 
         this.Boards = new Board[1];
-        this.Boards[0] = new Board(size, this);
+        this.Boards[0] = new Board(size, this, 0);
 
         // Create pieces and assign players
         int pieceCount = size * size;
@@ -65,12 +65,44 @@
         {
             int val = i + 1;
             int ownerPosition = (i % 2 == 0) ? 1 : 2;
-            this.Pieces[i] = new Piece(val, this, ownerPosition);
+            this.Pieces[i] = new Piece(val.ToString(), this, ownerPosition);
         }
     }
-
-    public override void DrawBoards()
+    public override bool CalculateComMove(Computer com)
     {
-        this.Boards[0].Draw();
+        Square? sq = null;
+        Piece? p = null;
+
+        //Build a list of lines that have one space free/almost full        
+        var AlmostFullLines = GetBoards()
+        .SelectMany(board => board.Lines!)
+        .Where(line => line.Count(sq => sq.IsOccupied) == line.Length - 1)
+        .ToList();
+        
+        //check all available spots for a winning move
+        if (AlmostFullLines.Count > 0)
+        {
+            foreach (Square[] line in AlmostFullLines)
+            {
+                int lineSum = line.Aggregate(0, (acc, el) => el.IsOccupied ? GetPieceValueForSquareAsInt(el) + acc : acc);
+                int requires = targetNumber - lineSum;
+
+                Piece? requiredPiece = com.PiecesAvailable.FirstOrDefault(el => int.Parse(el.Value) == requires);
+
+                if(requiredPiece != null)
+                {
+                    Square emptySpace = line.First(el => !el.IsOccupied);
+
+                    sq = emptySpace;
+                    p = requiredPiece;
+
+                    p.Place(sq);
+
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

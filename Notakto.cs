@@ -1,0 +1,98 @@
+﻿class Notakto : Game
+{
+    public override string GameType => "notakto";
+
+    public Notakto()
+    {
+    }
+
+    public Notakto(GameStateMemento state): base(state)
+    {
+    }
+
+    public override void ResolveTurn()
+    {
+        DrawBoards();
+
+        List<int> boardsWithFullLines = AllFullLines
+            .Select(line => line[0].BoardID)
+            .Distinct()                      
+            .ToList();
+
+        if (boardsWithFullLines.Count == 3)
+        {
+            this.Finished = true;
+            Console.WriteLine($"Player {this.WhoseTurn.Position} Wins!");
+            return;
+        }
+
+        if (AllAvailableSquares.Length <= 0)
+        {
+            this.Finished = true;
+            Console.WriteLine("No winner, it's a tie!");
+        }
+    }
+
+    public override void ShowRuleForTurn()
+    {
+        Console.WriteLine($"Place an X to be the first to create a row of 3 in each board");
+    }
+
+    protected override void InitializeBoards()
+    {
+        //always make three boards of size 3
+        int size = 3;
+        int boards = 3;
+        
+        this.Boards = new Board[]{ 
+            new Board(size, this, 0), 
+            new Board(size, this, 1), 
+            new Board(size, this, 2) 
+        };
+
+        // Create pieces and assign players
+        int pieceCount = size * size * boards;
+        this.Pieces = new Piece[pieceCount];
+        for (int i = 0; i < pieceCount; i++)
+        {
+            string val = "X";
+            int ownerPosition = (i % 2 == 0) ? 1 : 2;
+            this.Pieces[i] = new Piece(val, this, ownerPosition);
+        }
+    }
+    public override bool CalculateComMove(Computer com)
+    {
+        Square? sq = null;
+        Piece? p = null;
+
+        //Build a list of lines that have one space free/almost full        
+        var AlmostFullLines = GetBoards()
+        .SelectMany(board => board.Lines!)
+        .Where(line => line.Count(sq => sq.IsOccupied) == line.Length - 1)
+        .ToList();
+        
+        List<int> boardsWithFullLines = AllFullLines
+            .Select(line => line[0].BoardID)
+            .Distinct()                      
+            .ToList();
+
+        var boardIDWithWinningLine = GetBoards().FirstOrDefault(board => !boardsWithFullLines.Contains(board.BoardID));
+
+        var winningLine = AlmostFullLines.FirstOrDefault(line => line[0].BoardID == boardIDWithWinningLine.BoardID);
+
+        if (AlmostFullLines.Count > 0 && boardsWithFullLines.Count == 2 && boardIDWithWinningLine != null && winningLine != null)
+        {
+            
+            Square winningSpace = winningLine.First(space => !space.IsOccupied);
+
+            sq = winningSpace;
+            p = com.PiecesAvailable.First();
+
+            p.Place(sq);
+            
+            return true;
+        }
+
+        return false;
+    }
+}

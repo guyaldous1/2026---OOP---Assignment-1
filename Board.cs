@@ -2,6 +2,7 @@ class Board
 {
     public int Size;
     public Square[] Squares;
+    public int BoardID;
     public Square[] SquaresAvailable => Array.FindAll(this.Squares, s => !s.IsOccupied);
     public Square[] Column(int ColNum) => Array.FindAll(this.Squares, s => s.Col == ColNum);
     public Square[] Row(int RowNum) => Array.FindAll(this.Squares, s => s.Row == RowNum);
@@ -21,75 +22,30 @@ class Board
             return allLines;
         }
     }
+    public List<Square[]> FullLines => Lines.Where(line => line.All(square => square.IsOccupied)).ToList();
+
     private Game _game;
-    public Board(int setSize, Game Game)
+    public Board(int setSize, Game Game, int boardID)
     {
         this.Size = setSize;
         this.Squares = new Square[Size * Size];
         this._game = Game;
+        this.BoardID = boardID;
 
         for (int row = 0; row < Size; row++)
         {
             for (int col = 0; col < Size; col++)
             {
-                Squares[row * Size + col] = new Square(row, col);
+                Squares[row * Size + col] = new Square(row, col, boardID);
             }
         }
-    }
-
-    public void Draw()
-    {
-        Console.Clear();
-        var Game = this._game;
-        Console.WriteLine($"Turn {Game.TurnNumber}. It's Player {Game.WhoseTurn.Position}'s Turn");
-        Game.ShowRuleForTurn();
-    
-        //write player 1 pieces
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.Write($"Player 1's Remaining Pieces:");
-        foreach (Piece p in Game.Player1.PiecesAvailable)
-        {
-            Console.Write($" {p.Value}");
-        }
-        Console.Write('\n');
-        
-        //write board layout
-        for (int i = 0; i < this.Squares.Length; i++)
-        {
-            if(Game.WhoseTurn is Human human && human.Cursor.Location == this.Squares[i])
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write($"({human.Cursor.Value})");
-            }
-            else if(!this.Squares[i].IsOccupied)
-            {
-                Console.ResetColor();
-                Console.Write($"( )");
-            }
-            else
-            {   
-                Console.ResetColor();
-                Console.Write($"({_game.GetPieceValueForSquare(this.Squares[i])})");
-            }
-            if((i + 1) % this.Size == 0) Console.Write("\n");
-        }
-
-        //write player 2 pieces
-        Console.ResetColor();
-        Console.ForegroundColor = ConsoleColor.Red;
-        Console.Write($"Player 2's Remaining Pieces:");
-        foreach (Piece p in Game.Player2.PiecesAvailable)
-        {
-            Console.Write($" {p.Value}");
-        }
-        Console.ResetColor();
-        Console.Write('\n');
     }
 }
 
-class Square(int row, int col)
+class Square(int row, int col, int boardID)
 {
     public bool IsOccupied = false;
     public int Row = row;
     public int Col = col;
+    public int BoardID = boardID;
 }
