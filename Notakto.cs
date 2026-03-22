@@ -1,8 +1,6 @@
 ﻿class TicTacToe : Game
 {
-    public override string GameType => "tictactoe";
-
-    public int targetNumber => Boards[0].Size * (Boards[0].Size * Boards[0].Size + 1) / 2; // TODO this needs to be private after Computer loses its dependency on it.
+    public override string GameType => "notakto";
 
     public TicTacToe()
     {
@@ -40,30 +38,27 @@
 
     public override void ShowRuleForTurn()
     {
-        Console.WriteLine($"The Target Number is {targetNumber}");
+        Console.WriteLine($"Place an X to be the first to create a row of 3 in each board");
     }
 
     protected override void InitializeBoards()
     {
-        int size = 0;
-        while (size < 2 || size > 10)
-        {
-            Console.WriteLine("-- Enter board size (2-10):");
-            if (!int.TryParse(Console.ReadLine(), out size) || size < 2 || size > 10)
-            {
-                Console.WriteLine("Invalid size. Please choose a number between 2 and 10.");
-            }
-        }
-
-        this.Boards = new Board[1];
-        this.Boards[0] = new Board(size, this);
+        //always make three boards of size 3
+        int size = 3;
+        int boards = 3;
+        
+        this.Boards = new Board[]{ 
+            new Board(size, this), 
+            new Board(size, this), 
+            new Board(size, this) 
+        };
 
         // Create pieces and assign players
-        int pieceCount = size * size;
+        int pieceCount = size * size * boards;
         this.Pieces = new Piece[pieceCount];
         for (int i = 0; i < pieceCount; i++)
         {
-            int val = i + 1;
+            string val = 'X';
             int ownerPosition = (i % 2 == 0) ? 1 : 2;
             this.Pieces[i] = new Piece(val, this, ownerPosition);
         }

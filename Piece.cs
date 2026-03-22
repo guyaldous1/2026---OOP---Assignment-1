@@ -2,8 +2,7 @@ class Piece(int val, IGameContext gameContext, int ownerPosition)
 {
     protected IGameContext GameContext = gameContext;
 
-    public int Value = val; // TODO this will need to become a string/char (or even an object)
-
+    public string Value = val;
     public Square? Location { get; set; }
 
     public int OwnerPosition = ownerPosition;
