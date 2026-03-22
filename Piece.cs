@@ -1,4 +1,4 @@
-class Piece(int val, IGameContext gameContext, int ownerPosition)
+class Piece(string val, IGameContext gameContext, int ownerPosition)
 {
     protected IGameContext GameContext = gameContext;
 
@@ -8,7 +8,7 @@ class Piece(int val, IGameContext gameContext, int ownerPosition)
     public int OwnerPosition = ownerPosition;
 }
 
-class Cursor(int val, IGameContext gameContext, int ownerPosition) : Piece(val, gameContext, ownerPosition)
+class Cursor(string val, IGameContext gameContext, int ownerPosition) : Piece(val, gameContext, ownerPosition)
 {
     private static readonly string[] ValidDirections = ["left", "right", "up", "down", "next", "prev"];
     public void MoveLocation(string direction)

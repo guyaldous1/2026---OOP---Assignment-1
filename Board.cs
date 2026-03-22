@@ -69,7 +69,7 @@ class Board
             else
             {   
                 Console.ResetColor();
-                Console.Write($"({_game.GetPieceValueForSquare(this.Squares[i])})");
+                Console.Write($"({_game.GetPieceValueForSquareAsInt(this.Squares[i])})");
             }
             if((i + 1) % this.Size == 0) Console.Write("\n");
         }

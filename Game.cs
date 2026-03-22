@@ -1,3 +1,5 @@
+using System.ComponentModel.Design;
+
 abstract class Game : IGameContext
 {
     // Properties - marked as 'null!' because they are initialized in Setup()
@@ -12,6 +14,8 @@ abstract class Game : IGameContext
     public virtual string GameType { get; }
 
     private string gameMode;
+
+    // private View CurrentView = new ViewGameSetup();
 
     private PlayerFactory playerFactory;
 
@@ -89,7 +93,7 @@ abstract class Game : IGameContext
         };
 
         foreach (var board in Boards)
-            state.BoardValues.AddRange(board.Squares.Select(s => GetPieceValueForSquare(s).ToString() ?? "").ToList());
+            state.BoardValues.AddRange(board.Squares.Select(s => GetPieceValueForSquareAsInt(s).ToString() ?? "").ToList());
 
         return state;
     }
@@ -112,9 +116,15 @@ abstract class Game : IGameContext
         }
     }
 
-    public int GetPieceValueForSquare(Square square)
+    public string GetPieceValueForSquare(Square square)
     {
-        return this.Pieces.FirstOrDefault(p => p.Location == square)?.Value ?? 0;
+        return this.Pieces.FirstOrDefault(p => p.Location == square)?.Value ?? "0";
+    }
+
+    public int GetPieceValueForSquareAsInt(Square square)
+    {
+        var piece = this.Pieces.FirstOrDefault(p => p.Location == square);
+        return piece != null ? int.Parse(piece.Value) : 0;
     }
 
     public abstract void ResolveTurn();

@@ -21,7 +21,7 @@
             bool isFull = Array.TrueForAll(line, el => el.IsOccupied);
             if (!isFull) continue;
 
-            int lineSum = line.Sum(GetPieceValueForSquare);
+            int lineSum = line.Sum(GetPieceValueForSquareAsInt);
 
             if (lineSum == this.targetNumber)
             {
@@ -65,7 +65,7 @@
         {
             int val = i + 1;
             int ownerPosition = (i % 2 == 0) ? 1 : 2;
-            this.Pieces[i] = new Piece(val, this, ownerPosition);
+            this.Pieces[i] = new Piece(val.ToString(), this, ownerPosition);
         }
     }
 

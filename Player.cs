@@ -16,7 +16,7 @@ class Human : Player
 
     public Human(int pos, IGameContext gameContext) : base (pos, gameContext)
     {
-        Cursor = new Cursor(0, gameContext, Position);
+        Cursor = new Cursor("0", gameContext, Position);
     }
 
     public override void DoMove()
@@ -27,7 +27,8 @@ class Human : Player
         while (piece == null)
         {
             Console.WriteLine($"Player {this.Position}, enter the number of the piece you'd like to use and press enter to confirm:");
-            if (int.TryParse(Console.ReadLine(), out int val)) piece = PiecesAvailable.FirstOrDefault(x => x.Value == val);
+            string? input = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(input)) { piece = PiecesAvailable.FirstOrDefault(x => x.Value == input); }
             if (piece == null) Console.WriteLine($"That's not a valid piece, try again Player {this.Position}");
         }
         
@@ -93,10 +94,10 @@ class Computer(int pos, IGameContext Game) : Player(pos, Game)
         {
             foreach (Square[] line in AlmostFullLines)
             {
-                int lineSum = line.Aggregate(0, (acc, el) => el.IsOccupied ? this.GameContext.GetPieceValueForSquare(el) + acc : acc);
+                int lineSum = line.Aggregate(0, (acc, el) => el.IsOccupied ? this.GameContext.GetPieceValueForSquareAsInt(el) + acc : acc);
                 int requires = ((TicTacToe)GameContext).targetNumber - lineSum; // TODO we can't leave this this way.
 
-                Piece? requiredPiece = this.PiecesAvailable.FirstOrDefault(el => el.Value == requires);
+                Piece? requiredPiece = this.PiecesAvailable.FirstOrDefault(el => int.Parse(el.Value) == requires);
 
                 if(requiredPiece != null)
                 {

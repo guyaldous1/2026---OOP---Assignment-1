@@ -1,12 +1,15 @@
-﻿class TicTacToe : Game
+﻿class Notakto : Game
 {
     public override string GameType => "notakto";
 
-    public TicTacToe()
+    public int targetNumber => Boards[0].Size * (Boards[0].Size * Boards[0].Size + 1) / 2; // TODO this needs to be private after Computer loses its dependency on it.
+
+
+    public Notakto()
     {
     }
 
-    public TicTacToe(GameStateMemento state): base(state)
+    public Notakto(GameStateMemento state): base(state)
     {
     }
 
@@ -19,7 +22,7 @@
             bool isFull = Array.TrueForAll(line, el => el.IsOccupied);
             if (!isFull) continue;
 
-            int lineSum = line.Sum(GetPieceValueForSquare);
+            int lineSum = line.Sum(GetPieceValueForSquareAsInt);
 
             if (lineSum == this.targetNumber)
             {
@@ -58,7 +61,7 @@
         this.Pieces = new Piece[pieceCount];
         for (int i = 0; i < pieceCount; i++)
         {
-            string val = 'X';
+            string val = "X";
             int ownerPosition = (i % 2 == 0) ? 1 : 2;
             this.Pieces[i] = new Piece(val, this, ownerPosition);
         }
