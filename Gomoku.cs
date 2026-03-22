@@ -13,7 +13,7 @@
     public override void ResolveTurn()
     {
         DrawBoards();
-
+        //TODO calculate win condition
         List<int> boardsWithFullLines = AllFullLines
             .Select(line => line[0].BoardID)
             .Distinct()                      
@@ -35,7 +35,7 @@
 
     public override void ShowRuleForTurn()
     {
-        Console.WriteLine($"Place an X to be the first to create a row of 3 in each board");
+        Console.WriteLine($"First line of 5 in a row wins, lines greater than 5 don't count");
     }
 
     protected override void InitializeGameBoards()
@@ -50,7 +50,7 @@
     {
         Square? sq = null;
         Piece? p = null;
-
+        //TODO calculate computer winning move
         //Build a list of lines that have one space free/almost full        
         var AlmostFullLines = GetBoards()
         .SelectMany(board => board.Lines!)

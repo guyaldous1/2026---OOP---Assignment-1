@@ -150,6 +150,8 @@ abstract class Game : IGameContext
         ShowRuleForTurn();
     
         DrawPlayerPieces(Player1);
+
+        Console.Write("\n");
         
         //write each board layout
         foreach (Board board in this.Boards)
