@@ -22,7 +22,7 @@
         if (boardsWithFullLines.Count == 3)
         {
             this.Finished = true;
-            Console.WriteLine($"Player {this.WhoseTurn.Position} Wins!");
+            Console.WriteLine($"Player {this.WhoseNotTurn.Position} Wins!");
             return;
         }
 

@@ -20,6 +20,7 @@ abstract class Game : IGameContext
 
     // Expression-bodied properties for cleaner logic
     public Player WhoseTurn => TurnNumber % 2 == 0 ? Player2 : Player1;
+    public Player WhoseNotTurn => TurnNumber % 2 == 0 ? Player1 : Player2;
 
     public Game()
     {
@@ -117,7 +118,7 @@ abstract class Game : IGameContext
 
     public string GetPieceValueForSquare(Square square)
     {
-        return this.Pieces.FirstOrDefault(p => p.Location == square)?.Value ?? "0";
+        return this.Pieces.FirstOrDefault(p => p.Location == square)?.Value ?? "-";
     }
 
     public int GetPieceValueForSquareAsInt(Square square)
@@ -134,7 +135,7 @@ abstract class Game : IGameContext
     {
         Console.ResetColor();
         Console.ForegroundColor = player.Colour;
-        Console.Write($"Player 2's Remaining Pieces:");
+        Console.Write($"Player {player.Position}'s Remaining Pieces:");
         foreach (Piece p in player.PiecesAvailable)
         {
             Console.Write($" {p.Value}");
@@ -152,7 +153,7 @@ abstract class Game : IGameContext
         DrawPlayerPieces(Player1);
 
         Console.Write("\n");
-        
+
         //write each board layout
         foreach (Board board in this.Boards)
         {

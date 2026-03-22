@@ -1,4 +1,6 @@
-﻿class Gomoku : Game
+﻿using System.Text.RegularExpressions;
+
+class Gomoku : Game
 {
     public override string GameType => "gomoku";
 
@@ -9,26 +11,28 @@
     public Gomoku(GameStateMemento state): base(state)
     {
     }
-
+    List<string> LineStrings => Boards[0].Lines.Select(line => string.Concat(line.Select(sq => GetPieceValueForSquare(sq)))).ToList();
     public override void ResolveTurn()
     {
         DrawBoards();
-        //TODO calculate win condition
-        List<int> boardsWithFullLines = AllFullLines
-            .Select(line => line[0].BoardID)
-            .Distinct()                      
-            .ToList();
 
-        if (boardsWithFullLines.Count == 3)
+        string Xpattern = @"(?<!X)XXXXX(?!X)";
+        string Opattern = @"(?<!O)OOOOO(?!O)";
+
+        string pattern = (WhoseTurn.Position == 1) ? Xpattern : Opattern;
+
+        List<string> WinningStrings = LineStrings.Where(ls => Regex.IsMatch(ls, pattern)).ToList();
+
+        if (WinningStrings.Count > 0)
         {
-            this.Finished = true;
-            Console.WriteLine($"Player {this.WhoseTurn.Position} Wins!");
+            Finished = true;
+            Console.WriteLine($"Player {WhoseTurn.Position} Wins!");
             return;
         }
 
         if (AllAvailableSquares.Length <= 0)
         {
-            this.Finished = true;
+            Finished = true;
             Console.WriteLine("No winner, it's a tie!");
         }
     }
