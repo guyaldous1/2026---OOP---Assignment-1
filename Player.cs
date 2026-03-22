@@ -46,6 +46,7 @@ class Human : Player
         {
             Console.WriteLine($"Player {this.Position}, use the arrow keys to navigate the remaining spaces and press enter to select one");
             Console.WriteLine($"If the space you want to use is inaccessible with the arrow keys, use the n and m keys to cycle through available spaces");
+            Console.WriteLine($"You can use the number keys 1,2 or 3 to navigate to alternate boards if the game type requires"); //TODO make this conditional on gametype
 
             key = Console.ReadKey(true);
             if (validKeys.Contains(key.Key)){
