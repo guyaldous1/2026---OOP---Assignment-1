@@ -14,7 +14,7 @@ abstract class Game : IGameContext
 
     public virtual string GameType { get; }
 
-    public string gameMode { get; private set; }
+    public string PlayerGameMode { get; private set; }
 
     private PlayerFactory playerFactory;
 
@@ -63,7 +63,7 @@ abstract class Game : IGameContext
 
         this.Player1 = this.playerFactory.CreateHumanPlayer(1);
         bool p2IsHuman = (mode == 1);
-        this.gameMode = p2IsHuman ? "HvH" : "HvC";
+        this.PlayerGameMode = p2IsHuman ? "HvH" : "HvC";
         this.Player2 = p2IsHuman ? this.playerFactory.CreateHumanPlayer(2) : this.playerFactory.CreateComputerPlayer(2);
         
         Console.Clear();
@@ -102,7 +102,7 @@ abstract class Game : IGameContext
         DrawBoards();
         Console.WriteLine($"Turn {TurnNumber}: Player {WhoseTurn.Position}'s move.");
 
-        WhoseTurn.DoMove(this);
+        WhoseTurn.DoMove();
         ResolveTurn();
 
         if (!Finished)
@@ -192,4 +192,18 @@ abstract class Game : IGameContext
     public List<Square[]> AllFullLines => GetBoards().SelectMany(board => board.FullLines).ToList();
     protected abstract void InitializeBoards();
     public abstract bool CalculateComMove(Computer com);
+
+    public string PlayerMoveInstructions()
+    {
+        string MoveInstructions = $"Player {WhoseTurn.Position}, use the arrow keys to navigate the remaining spaces and press enter to select one"
+        + $"\nIf the space you want to use is inaccessible with the arrow keys, use the n and m keys to cycle through available spaces";
+        
+        if(GameType == "notakto")
+        {
+            MoveInstructions += $"\nYou can use the number keys 1,2 or 3 to navigate to alternate boards if the game type requires";
+        }
+
+        return MoveInstructions;
+    }
+                
 }

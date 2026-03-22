@@ -7,7 +7,7 @@ abstract class Player(int pos, IGameContext gameContext)
     public Piece[] Pieces => Array.FindAll(GameContext.GetPieces() ?? [], p => p.OwnerPosition == this.Position);
     public Piece[] PiecesAvailable => Array.FindAll(this.Pieces, p => p.Location == null);
     public IGameContext GameContext => gameContext;
-    public abstract void DoMove(Game game);
+    public abstract void DoMove();
 
     public string CaptureState() => this is Human ? "human" : "computer";
 }
@@ -21,11 +21,11 @@ class Human : Player
         Cursor = new Cursor("0", gameContext, Position);
     }
 
-    public override void DoMove(Game game)
+    public override void DoMove()
     {
         Console.ResetColor();
         //Select A Piece or force one for non neumerical games
-        Piece? piece = game.gameMode != "tictactoe" ? PiecesAvailable.FirstOrDefault() : null;
+        Piece? piece = GameContext.GameType != "tictactoe" ? PiecesAvailable.FirstOrDefault() : null;
         while (piece == null)
         {
             Console.WriteLine($"Player {this.Position}, enter the number of the piece you'd like to use and press enter to confirm:");
@@ -44,9 +44,7 @@ class Human : Player
         bool selected = false;
         do
         {
-            Console.WriteLine($"Player {this.Position}, use the arrow keys to navigate the remaining spaces and press enter to select one");
-            Console.WriteLine($"If the space you want to use is inaccessible with the arrow keys, use the n and m keys to cycle through available spaces");
-            Console.WriteLine($"You can use the number keys 1,2 or 3 to navigate to alternate boards if the game type requires"); //TODO make this conditional on gametype
+            Console.Write(GameContext.PlayerMoveInstructions());
 
             key = Console.ReadKey(true);
             if (validKeys.Contains(key.Key)){
@@ -60,8 +58,8 @@ class Human : Player
 
                 //move boards with numbers keys if possible
                 if(key.Key == ConsoleKey.D1) this.Cursor.MoveBoard(0);
-                if(key.Key == ConsoleKey.D2) this.Cursor.MoveBoard(1);
-                if(key.Key == ConsoleKey.D3) this.Cursor.MoveBoard(2);
+                if(key.Key == ConsoleKey.D2 && GameContext.GetBoards().Length > 1) this.Cursor.MoveBoard(1);
+                if(key.Key == ConsoleKey.D3 && GameContext.GetBoards().Length > 1) this.Cursor.MoveBoard(2);
 
                 if(key.Key == ConsoleKey.Enter)      selected = true;
 
@@ -84,8 +82,8 @@ class Human : Player
 
 class Computer(int pos, IGameContext Game) : Player(pos, Game)
 {
-    public override void DoMove(Game game){
-       bool FoundAWinner = game.CalculateComMove(this);
+    public override void DoMove(){
+       bool FoundAWinner = GameContext.CalculateComMove(this);
 
        //if no winning move is found, get available squares, and randomly pick a piece to place in a random square 
         if(!FoundAWinner)

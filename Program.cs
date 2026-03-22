@@ -87,6 +87,7 @@ class Program
                 default:
                     break;
             }
+            
 
             if (!finished)
                 command = game.WhoseTurn is Human ? GetCommand().ToLower() : "turn";
