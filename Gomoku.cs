@@ -52,35 +52,28 @@ class Gomoku : Game
     }
     public override bool CalculateComMove(Computer com)
     {
-        Square? sq = null;
-        Piece? p = null;
-        //TODO calculate computer winning move
-        //Build a list of lines that have one space free/almost full        
-        var AlmostFullLines = GetBoards()
-        .SelectMany(board => board.Lines!)
-        .Where(line => line.Count(sq => sq.IsOccupied) == line.Length - 1)
-        .ToList();
-        
-        List<int> boardsWithFullLines = AllFullLines
-            .Select(line => line[0].BoardID)
-            .Distinct()                      
-            .ToList();
+        //Find patterns of 4 but not 5   
+        string pattern = @"-OOOO|OOOO-";
 
-        var boardIDWithWinningLine = GetBoards().FirstOrDefault(board => !boardsWithFullLines.Contains(board.BoardID));
-
-        var winningLine = AlmostFullLines.FirstOrDefault(line => line[0].BoardID == boardIDWithWinningLine.BoardID);
-
-        if (AlmostFullLines.Count > 0 && boardsWithFullLines.Count == 2 && boardIDWithWinningLine != null && winningLine != null)
+        foreach (Square[] line in Boards[0].Lines)
         {
-            
-            Square winningSpace = winningLine.First(space => !space.IsOccupied);
+            string lineString = string.Concat(line.Select(sq => GetPieceValueForSquare(sq)));
+            Match match = Regex.Match(lineString, pattern);
 
-            sq = winningSpace;
-            p = com.PiecesAvailable.First();
+            if (match.Success)
+            {
+                // Find the index of the '-' within the matched part and select that as the winning square
+                int dashIndex = match.Value.StartsWith("-") 
+                    ? match.Index 
+                    : match.Index + 4;
 
-            p.Place(sq);
-            
-            return true;
+                Square winningSquare = line[dashIndex];
+                Piece piece = com.PiecesAvailable.First();
+
+                piece.Place(winningSquare);
+                
+                return true;
+            }
         }
 
         return false;

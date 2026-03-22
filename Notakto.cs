@@ -48,8 +48,6 @@
     }
     public override bool CalculateComMove(Computer com)
     {
-        Square? sq = null;
-        Piece? p = null;
 
         //Build a list of lines that have one space free/almost full        
         var AlmostFullLines = GetBoards()
@@ -69,12 +67,10 @@
         if (AlmostFullLines.Count > 0 && boardsWithFullLines.Count == 2 && boardIDWithWinningLine != null && winningLine != null)
         {
             
-            Square winningSpace = winningLine.First(space => !space.IsOccupied);
+            Square winningSpace = winningLine.First(space => !space.IsOccupied);           
+            Piece piece = com.PiecesAvailable.First();
 
-            sq = winningSpace;
-            p = com.PiecesAvailable.First();
-
-            p.Place(sq);
+            piece.Place(winningSpace);
             
             return true;
         }
