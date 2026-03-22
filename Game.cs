@@ -1,4 +1,5 @@
 using System.ComponentModel.Design;
+using System.Reflection.Metadata;
 
 abstract class Game : IGameContext
 {
@@ -13,9 +14,7 @@ abstract class Game : IGameContext
 
     public virtual string GameType { get; }
 
-    private string gameMode;
-
-    // private View CurrentView = new ViewGameSetup();
+    public string gameMode { get; private set; }
 
     private PlayerFactory playerFactory;
 
@@ -103,7 +102,7 @@ abstract class Game : IGameContext
         DrawBoards();
         Console.WriteLine($"Turn {TurnNumber}: Player {WhoseTurn.Position}'s move.");
 
-        WhoseTurn.DoMove();
+        WhoseTurn.DoMove(this);
         ResolveTurn();
 
         if (!Finished)
@@ -131,11 +130,66 @@ abstract class Game : IGameContext
 
     public abstract void ShowRuleForTurn();
 
-    public abstract void DrawBoards();
+    public void DrawBoards()
+    {
+        Console.Clear();
+        Console.WriteLine($"Turn {this.TurnNumber}. It's Player {this.WhoseTurn.Position}'s Turn");
+        ShowRuleForTurn();
+    
+        //write player 1 pieces
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.Write($"Player 1's Remaining Pieces:");
+        foreach (Piece p in this.Player1.PiecesAvailable)
+        {
+            Console.Write($" {p.Value}");
+        }
+        Console.Write('\n');
+        
+        //write each board layout
+        foreach (Board board in this.Boards)
+        {
+            for (int i = 0; i < board.Squares.Length; i++)
+            {
+                if(WhoseTurn is Human human && human.Cursor.Location == board.Squares[i])
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.Write($"({human.Cursor.Value})");
+                }
+                else if(!board.Squares[i].IsOccupied)
+                {
+                    Console.ResetColor();
+                    Console.Write($"( )");
+                }
+                else
+                {   
+                    Console.ResetColor();
+                    Console.Write($"({GetPieceValueForSquare(board.Squares[i])})");
+                }
+                if((i + 1) % board.Size == 0) Console.Write("\n");
+            }
+            Console.Write("\n");
+        }
+        
+        //write player 2 pieces
+        Console.ResetColor();
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.Write($"Player 2's Remaining Pieces:");
+        foreach (Piece p in Player2.PiecesAvailable)
+        {
+            Console.Write($" {p.Value}");
+        }
+        Console.ResetColor();
+        Console.Write('\n');
+    }
 
     public Board GetBoard(int index = 0) => Boards?[index] ?? null!;
 
     public Piece[] GetPieces() => Pieces;
+
+    public Board[] GetBoards() => Boards;
+
+    public Square[] AllAvailableSquares => GetBoards().SelectMany(board => board.SquaresAvailable).ToArray();
+    public List<Square[]> AllFullLines => GetBoards().SelectMany(board => board.FullLines).ToList();
 
     protected abstract void InitializeBoards();
 }

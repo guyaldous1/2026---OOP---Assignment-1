@@ -14,7 +14,7 @@ static class GameFactory
         return type switch
         {
             "tictactoe" => new TicTacToe(),
-//TODO                "notakto" => new Notakto(),
+            "notakto" => new Notakto(),
 //TODO                "gomoku" => new Gomoku(),
             _ => throw new ArgumentException($"Unknown game type: {type}")
         };
@@ -25,7 +25,7 @@ static class GameFactory
         Game game = state.GameType switch
         {
             "tictactoe" => new TicTacToe(state),
-//TODO                "notakto" => new Notakto(state),
+            "notakto" => new Notakto(state),
 //TODO                "gomoku" => new Gomoku(state),
             _ => throw new ArgumentException($"Unknown game type: {state.GameType}")
         };

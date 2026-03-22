@@ -2,9 +2,6 @@
 {
     public override string GameType => "notakto";
 
-    public int targetNumber => Boards[0].Size * (Boards[0].Size * Boards[0].Size + 1) / 2; // TODO this needs to be private after Computer loses its dependency on it.
-
-
     public Notakto()
     {
     }
@@ -17,22 +14,21 @@
     {
         DrawBoards();
 
-        foreach (Square[] line in this.Boards[0].Lines)
+        //TODO end of turn logic for notakto
+
+        List<int> boardsWithFullLines = AllFullLines
+            .Select(line => line[0].BoardID)
+            .Distinct()                      
+            .ToList();
+
+        if (boardsWithFullLines.Count == 3)
         {
-            bool isFull = Array.TrueForAll(line, el => el.IsOccupied);
-            if (!isFull) continue;
-
-            int lineSum = line.Sum(GetPieceValueForSquareAsInt);
-
-            if (lineSum == this.targetNumber)
-            {
-                this.Finished = true;
-                Console.WriteLine($"Player {this.WhoseTurn.Position} Wins!");
-                return;
-            }
+            this.Finished = true;
+            Console.WriteLine($"Player {this.WhoseTurn.Position} Wins!");
+            return;
         }
 
-        if (this.Boards[0].SquaresAvailable.Length <= 0)
+        if (AllAvailableSquares.Length <= 0)
         {
             this.Finished = true;
             Console.WriteLine("No winner, it's a tie!");
@@ -51,9 +47,9 @@
         int boards = 3;
         
         this.Boards = new Board[]{ 
-            new Board(size, this), 
-            new Board(size, this), 
-            new Board(size, this) 
+            new Board(size, this, 0), 
+            new Board(size, this, 1), 
+            new Board(size, this, 2) 
         };
 
         // Create pieces and assign players
@@ -65,10 +61,5 @@
             int ownerPosition = (i % 2 == 0) ? 1 : 2;
             this.Pieces[i] = new Piece(val, this, ownerPosition);
         }
-    }
-
-    public override void DrawBoards()
-    {
-        this.Boards[0].Draw();
     }
 }

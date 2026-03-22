@@ -56,7 +56,7 @@
         }
 
         this.Boards = new Board[1];
-        this.Boards[0] = new Board(size, this);
+        this.Boards[0] = new Board(size, this, 0);
 
         // Create pieces and assign players
         int pieceCount = size * size;
@@ -67,10 +67,5 @@
             int ownerPosition = (i % 2 == 0) ? 1 : 2;
             this.Pieces[i] = new Piece(val.ToString(), this, ownerPosition);
         }
-    }
-
-    public override void DrawBoards()
-    {
-        this.Boards[0].Draw();
     }
 }

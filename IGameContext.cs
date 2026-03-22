@@ -9,7 +9,12 @@ interface IGameContext
 {
     Board GetBoard(int index = 0);
 
+    Board[] GetBoards();
+
     Piece[] GetPieces();
+
+    Square[] AllAvailableSquares { get; }
+    List<Square[]> AllFullLines { get; }
 
     string GetPieceValueForSquare(Square sqaure);
 
