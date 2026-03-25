@@ -1,13 +1,11 @@
 
-using System.Diagnostics;
-
 abstract class Player(int pos, IGameContext gameContext)
 {
     public int Position = pos;
     public Piece[] Pieces => Array.FindAll(GameContext.GetPieces() ?? [], p => p.OwnerPosition == this.Position);
-    public Piece[] PiecesAvailable => Array.FindAll(this.Pieces, p => p.Location == null);
+    public Piece[] PiecesAvailable => Array.FindAll(this.Pieces, p => p.LocationSquareID == -1);
     public IGameContext GameContext => gameContext;
-    public abstract void DoMove();
+    public abstract Move DoMove();
     public string CaptureState() => this is Human ? "human" : "computer";
     public ConsoleColor Colour => this.Position % 2 == 0 ? ConsoleColor.Red : ConsoleColor.Green;
 }
@@ -21,15 +19,15 @@ class Human : Player
         Cursor = new Cursor("0", gameContext, Position);
     }
 
-    public override void DoMove()
+    public override Move DoMove()
     {
         Console.ResetColor();
         //Select A Piece or force one for non neumerical games
-        Piece? piece = GameContext.GameType != "tictactoe" ? PiecesAvailable.FirstOrDefault() : null;
+        Piece piece = GameContext.GameType != "tictactoe" ? PiecesAvailable.FirstOrDefault() : null;
         while (piece == null)
         {
             Console.WriteLine($"Player {this.Position}, enter the number of the piece you'd like to use and press enter to confirm:");
-            string? input = Console.ReadLine();
+            string input = Console.ReadLine();
             if (!string.IsNullOrWhiteSpace(input)) { piece = PiecesAvailable.FirstOrDefault(x => x.Value == input); }
             if (piece == null) Console.WriteLine($"That's not a valid piece, try again Player {this.Position}");
         }
@@ -72,32 +70,38 @@ class Human : Player
         } while (!selected);
 
         var currentBoard = this.Cursor.Location.BoardID;    
-        Square? sq = GameContext.GetBoard(currentBoard).Squares.FirstOrDefault(x => x.Row == this.Cursor.Location.Row && x.Col == this.Cursor.Location.Col);
+        Square sq = GameContext.GetBoard(currentBoard).Squares.FirstOrDefault(x => x.Row == this.Cursor.Location.Row && x.Col == this.Cursor.Location.Col);
         //Place Piece
-        piece.Place(sq);
+        piece.Place(sq.SquareID);
+        sq.IsOccupied = true;
         //remove cursor from the board
         this.Cursor.Location = null;
+
+        return new Move { PieceID = piece.PieceID, SquareID = sq.SquareID };
     }
 }
 
 class Computer(int pos, IGameContext Game) : Player(pos, Game)
 {
-    public override void DoMove(){
-       bool FoundAWinner = GameContext.CalculateComMove(this);
-
-       //if no winning move is found, get available squares, and randomly pick a piece to place in a random square 
-        if(!FoundAWinner)
+    public override Move DoMove() {
+        if (GameContext.CalculateComMove(this, out Move move))
         {
-            var availSqurares = GameContext.AllAvailableSquares;
-
-            Random rng = new Random();
-            int sqrnum = rng.Next(0, availSqurares.Length);
-            int piecenum = rng.Next(0, PiecesAvailable.Length);
-
-            Square sq = availSqurares[sqrnum];
-            Piece p = PiecesAvailable[piecenum];
-
-            p.Place(sq);
+            return move;
         }
+
+        // no winning move is found, get available squares, and randomly pick a piece to place in a random square 
+        var availSqurares = GameContext.AllAvailableSquares;
+
+        Random rng = new Random();
+        int sqrnum = rng.Next(0, availSqurares.Length);
+        int piecenum = rng.Next(0, PiecesAvailable.Length);
+
+        Square sq = availSqurares[sqrnum];
+        Piece p = PiecesAvailable[piecenum];
+
+        p.Place(sq.SquareID);
+        sq.IsOccupied = true;
+
+        return new Move { PieceID = p.PieceID, SquareID = sq.SquareID };
     }
 }

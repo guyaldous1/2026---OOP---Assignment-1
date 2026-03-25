@@ -46,7 +46,8 @@
 
         InitializeBoards(size, boardCount, "x");
     }
-    public override bool CalculateComMove(Computer com)
+
+    public override bool CalculateComMove(Computer com, out Move move)
     {
 
         //Build a list of lines that have one space free/almost full        
@@ -70,11 +71,13 @@
             Square winningSpace = winningLine.First(space => !space.IsOccupied);           
             Piece piece = com.PiecesAvailable.First();
 
-            piece.Place(winningSpace);
-            
+            piece.Place(winningSpace.SquareID);
+
+            move = new Move { PieceID = piece.PieceID, SquareID = winningSpace.SquareID };
             return true;
         }
 
+        move = null;
         return false;
     }
 }

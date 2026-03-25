@@ -23,6 +23,7 @@ class Board
         }
     }
     public List<Square[]> FullLines => Lines.Where(line => line.All(square => square.IsOccupied)).ToList();
+    public List<Square> AllSquares => Squares.ToList();
     public Board(int setSize, int boardID)
     {
         this.Size = setSize;
@@ -37,12 +38,36 @@ class Board
             }
         }
     }
-}
 
-class Square(int row, int col, int boardID)
-{
-    public bool IsOccupied = false;
-    public int Row = row;
-    public int Col = col;
-    public int BoardID = boardID;
+    public Board(string state)
+    {
+        string[] values;
+        try
+        {
+            values = state.Split(',');
+            BoardID = Convert.ToInt32(values[0]);
+            Size = Convert.ToInt32(values[1]);
+            Squares = new Square[Size * Size];
+        }
+        catch
+        {
+            throw new DeserialisationException($"Invalid format deserialising {nameof(Board)}");
+        }
+
+        if (values.Length != Size * Size + 2)
+        {
+            throw new DeserialisationException($"Invalid length of serialised state in {nameof(Square)}");
+        }
+
+        for (int squarePos = 0; squarePos < Size * Size; squarePos++)
+            Squares[squarePos] = new Square(values[squarePos + 2]); // First two positions in state are BoardID and Size, our square state starts after this.
+    }
+
+    public string CaptureState()
+    {
+        string result = $"{BoardID},{Size}";
+        for (int squarePos = 0; squarePos < Size * Size; squarePos++)
+            result += $",{Squares[squarePos].CaptureState()}";
+        return result;
+    }
 }

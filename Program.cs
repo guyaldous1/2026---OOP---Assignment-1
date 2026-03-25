@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Security.AccessControl;
+﻿using System.Net.NetworkInformation;
 using System.Text.Json;
 
 // ============================================================
@@ -16,23 +11,30 @@ class Program
         Console.OutputEncoding = System.Text.Encoding.UTF8;
         ShowBanner();
 
-        // Present load options, and fall back to game creation
-        Game game = LoadGame();
-        if (game == null)
+        try
         {
-            Console.WriteLine("\n  Select game:");
-            Console.WriteLine("    1. Numerical Tic-Tac-Toe");
-            Console.WriteLine("    2. Notakto (Impartial Tic-Tac-Toe)");
-            Console.WriteLine("    3. Gomoku");
-            Console.Write("\n  Choice [1-3]: ");
-            string gameType = Console.ReadLine()?.Trim() ?? "1";
-            if (gameType is not ("1" or "2" or "3")) gameType = "1";
+            // Present load options, and fall back to game creation
+            Game game = LoadGame();
+            if (game == null)
+            {
+                Console.WriteLine("\n  Select game:");
+                Console.WriteLine("    1. Numerical Tic-Tac-Toe");
+                Console.WriteLine("    2. Notakto (Impartial Tic-Tac-Toe)");
+                Console.WriteLine("    3. Gomoku");
+                Console.Write("\n  Choice [1-3]: ");
+                string gameType = Console.ReadLine()?.Trim() ?? "1";
+                if (gameType is not ("1" or "2" or "3")) gameType = "1";
 
-            game = GameFactory.CreateGame(GameTypeNumericToGameType(gameType));
-            game.StartGame();
+                game = GameFactory.CreateGame(GameTypeNumericToGameType(gameType));
+                game.StartGame();
+            }
+
+            RunGame(game);
         }
-
-        RunGame(game);
+        catch(Exception ex)
+        {
+            Console.WriteLine($"Game has encountered an unrecoverable error: {ex.ToString()}");
+        }
 
         Console.WriteLine("  Press any key to exit...");
         Console.ReadKey();
@@ -42,8 +44,8 @@ class Program
     {
         Console.Clear();
         Console.WriteLine("  ╔══════════════════════════════════════════╗");
-        Console.WriteLine("  ║      Board Games Framework v3.0         ║");
-        Console.WriteLine("  ║  Numerical TTT  •  Notakto  •  Gomoku   ║");
+        Console.WriteLine("  ║      Board Games Framework v3.0          ║");
+        Console.WriteLine("  ║  Numerical TTT  •  Notakto  •  Gomoku    ║");
         Console.WriteLine("  ╚══════════════════════════════════════════╝");
     }
 
@@ -84,6 +86,12 @@ class Program
                 case "save":
                     SaveGame(game);
                     break;
+                case "undo":
+                    UndoTurn(game);
+                    break;
+                case "redo":
+                    RedoTurn(game);
+                    break;
                 default:
                     break;
             }
@@ -97,7 +105,7 @@ class Program
     static private string GetCommand()
     {
         Console.Write("Enter command (Enter for next turn, \"help\" for game instructions)" + Environment.NewLine + "> ");
-        string? command = Console.ReadLine();
+        string command = Console.ReadLine();
         return string.IsNullOrWhiteSpace(command) ? "turn" : command;
     }
 
@@ -113,7 +121,7 @@ class Program
     {
         // Check for saved games
         var saveFiles = Directory.GetFiles(".", "savegame_*.json").OrderByDescending(f => f).ToArray();
-        Game? game = null;
+        Game game = null;
 
         if (saveFiles.Length == 0)
         {
@@ -125,7 +133,7 @@ class Program
         for (int i = 0; i < Math.Min(saveFiles.Length, 5); i++)
             Console.WriteLine($"     {i + 1}. {Path.GetFileName(saveFiles[i])}");
         Console.Write("\n  Load a save? (enter number or press Enter for new game): ");
-        string? choice = Console.ReadLine()?.Trim();
+        string choice = Console.ReadLine()?.Trim();
 
         if (int.TryParse(choice, out int idx) && idx >= 1 && idx <= Math.Min(saveFiles.Length, 5))
         {
@@ -136,6 +144,10 @@ class Program
                 game = GameFactory.CreateFromState(state);
                 Console.WriteLine("  ✅ Game loaded successfully!");
             }
+            catch (DeserialisationException ex)
+            {
+                Console.WriteLine($"Game deserialisation failed! Check your file. Error: {ex.Message}");
+            }
             catch (Exception ex)
             {
                 Console.WriteLine($"  ✗ Failed to load: {ex.Message}");
@@ -143,5 +155,39 @@ class Program
         }
 
         return game;
+    }
+
+    static private void UndoTurn(Game game)
+    {
+        if (game is null)
+        {
+            return;
+        }
+
+        try
+        {
+            game.UndoMove();
+            if (game.Player2 is Computer)
+            {
+                // Do a second undo, otherwise the computer player will step in and play again. We'll undo back to before the human player last played.
+                game.UndoMove();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Undo failed. Reason: {ex.Message}");
+        }
+    }
+
+    static private void RedoTurn(Game game)
+    {
+        try
+        {
+            game?.RedoMove();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Redo failed. Reason: {ex.Message}");
+        }
     }
 }
