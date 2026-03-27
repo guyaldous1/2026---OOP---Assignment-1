@@ -47,37 +47,42 @@
         InitializeBoards(size, boardCount, "x");
     }
 
-    public override bool CalculateComMove(Computer com, out Move move)
+    public override IEnumerable<Move> GetStrategicMoves()
     {
-
         //Build a list of lines that have one space free/almost full        
-        var AlmostFullLines = GetBoards()
+        List<Square[]> AlmostFullLines = GetBoards()
         .SelectMany(board => board.Lines!)
         .Where(line => line.Count(sq => sq.IsOccupied) == line.Length - 1)
         .ToList();
-        
+
         List<int> boardsWithFullLines = AllFullLines
             .Select(line => line[0].BoardID)
-            .Distinct()                      
+            .Distinct()
             .ToList();
 
-        var boardIDWithWinningLine = GetBoards().FirstOrDefault(board => !boardsWithFullLines.Contains(board.BoardID));
+        Board boardIDWithWinningLine = GetBoards().FirstOrDefault(board => !boardsWithFullLines.Contains(board.BoardID));
+        if (boardIDWithWinningLine is null)
+        {
+            yield break;
+        }
 
         var winningLine = AlmostFullLines.FirstOrDefault(line => line[0].BoardID == boardIDWithWinningLine.BoardID);
+        if (winningLine is null)
+        {
+            yield break;
+        }
+
+        // We return a player-agnostic collection enumeration, so we'll include one X for each player here. Players can filter by their ownerPosition.
+        var useablePieces = Pieces.DistinctBy(piece => piece.OwnerPosition);
 
         if (AlmostFullLines.Count > 0 && boardsWithFullLines.Count == 2 && boardIDWithWinningLine != null && winningLine != null)
         {
-            
-            Square winningSpace = winningLine.First(space => !space.IsOccupied);           
-            Piece piece = com.PiecesAvailable.First();
+            Square winningSpace = winningLine.First(space => !space.IsOccupied);
 
-            piece.Place(winningSpace.SquareID);
-
-            move = new Move { PieceID = piece.PieceID, SquareID = winningSpace.SquareID };
-            return true;
+            foreach(Piece useablePiece in useablePieces)
+            {
+                yield return new Move { PieceID = useablePiece.PieceID, SquareID = winningSpace.SquareID };
+            }
         }
-
-        move = null;
-        return false;
     }
 }

@@ -59,18 +59,18 @@
         InitializeBoards(size, boardCount, "numbers");
     }
 
-    public override bool CalculateComMove(Computer com, out Move move)
+    public override IEnumerable<Move> GetStrategicMoves()
     {
         Square sq = null;
         Piece p = null;
 
         //Build a list of lines that have one space free/almost full        
-        var AlmostFullLines = GetBoards()
-        .SelectMany(board => board.Lines!)
-        .Where(line => line.Count(sq => sq.IsOccupied) == line.Length - 1)
-        .ToList();
-        
-        //check all available spots for a winning move
+        List<Square[]> AlmostFullLines = GetBoards()
+            .SelectMany(board => board.Lines)
+            .Where(line => line.Count(sq => sq.IsOccupied) == line.Length - 1)
+            .ToList();
+
+        //check all available spots for winning moves
         if (AlmostFullLines.Count > 0)
         {
             foreach (Square[] line in AlmostFullLines)
@@ -78,25 +78,13 @@
                 int lineSum = line.Aggregate(0, (acc, el) => el.IsOccupied ? GetPieceValueForSquareAsInt(el.SquareID) + acc : acc);
                 int requires = targetNumber - lineSum;
 
-                Piece requiredPiece = com.PiecesAvailable.FirstOrDefault(el => int.Parse(el.Value) == requires);
-
-                if(requiredPiece != null)
+                Piece requiredPiece = Pieces.FirstOrDefault(piece => piece.LocationSquareID == -1 && int.Parse(piece.Value) == requires);
+                if (requiredPiece != null)
                 {
-                    Square emptySpace = line.First(el => !el.IsOccupied);
-
-                    sq = emptySpace;
-                    p = requiredPiece;
-
-                    p.Place(sq.SquareID);
-                    sq.IsOccupied = true;
-
-                    move = new Move { PieceID = p.PieceID, SquareID = sq.SquareID };
-                    return true;
+                    Square winningSpace = line.First(square => !square.IsOccupied);
+                    yield return new Move { PieceID = requiredPiece.PieceID, SquareID = winningSpace.SquareID };
                 }
             }
         }
-
-        move = null;
-        return false;
     }
 }

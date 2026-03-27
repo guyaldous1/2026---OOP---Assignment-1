@@ -214,11 +214,8 @@ abstract class Game : IGameContext
     }
 
     public Board GetBoard(int index = 0) => Boards?[index] ?? null!;
-
     public Piece[] GetPieces() => Pieces;
-
     public Board[] GetBoards() => Boards;
-
     public Square[] AllAvailableSquares => GetBoards().SelectMany(board => board.SquaresAvailable).ToArray();
     public List<Square[]> AllFullLines => GetBoards().SelectMany(board => board.FullLines).ToList();
     public List<Square> AllSquares => GetBoards().SelectMany(board => board.AllSquares).ToList();
@@ -253,7 +250,12 @@ abstract class Game : IGameContext
         }
         
     }
-    public abstract bool CalculateComMove(Computer com, out Move move);
+
+    /// <summary>
+    /// For games where a move can win, this will return winning moves. For a game where a move can lose, this will return non-losing moves.
+    /// </summary>
+    public abstract IEnumerable<Move> GetStrategicMoves();
+
 
     public string PlayerMoveInstructions()
     {
