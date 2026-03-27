@@ -11,7 +11,7 @@ class Gomoku : Game
     public Gomoku(GameStateMemento state): base(state)
     {
     }
-    List<string> LineStrings => Boards[0].Lines.Select(line => string.Concat(line.Select(sq => GetPieceValueForSquare(sq)))).ToList();
+    List<string> LineStrings => Boards[0].Lines.Select(line => string.Concat(line.Select(sq => GetPieceValueForSquare(sq.SquareID)))).ToList();
     public override void ResolveTurn()
     {
         DrawBoards();
@@ -50,14 +50,15 @@ class Gomoku : Game
 
         InitializeBoards(size, boardCount, "xo");
     }
-    public override bool CalculateComMove(Computer com)
+
+    public override bool CalculateComMove(Computer com, out Move move)
     {
         //Find patterns of 4 but not 5   
         string pattern = @"-OOOO|OOOO-";
 
         foreach (Square[] line in Boards[0].Lines)
         {
-            string lineString = string.Concat(line.Select(sq => GetPieceValueForSquare(sq)));
+            string lineString = string.Concat(line.Select(sq => GetPieceValueForSquare(sq.SquareID)));
             Match match = Regex.Match(lineString, pattern);
 
             if (match.Success)
@@ -70,12 +71,13 @@ class Gomoku : Game
                 Square winningSquare = line[dashIndex];
                 Piece piece = com.PiecesAvailable.First();
 
-                piece.Place(winningSquare);
-                
+                piece.Place(winningSquare.SquareID);
+                move = new Move { PieceID = piece.PieceID, SquareID = winningSquare.SquareID };
                 return true;
             }
         }
 
+        move = null;
         return false;
     }
 }

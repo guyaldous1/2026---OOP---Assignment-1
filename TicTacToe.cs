@@ -21,7 +21,7 @@
             bool isFull = Array.TrueForAll(line, el => el.IsOccupied);
             if (!isFull) continue;
 
-            int lineSum = line.Sum(GetPieceValueForSquareAsInt);
+            int lineSum = line.Select(sq => sq.SquareID).Sum(GetPieceValueForSquareAsInt);
 
             if (lineSum == this.targetNumber)
             {
@@ -58,10 +58,11 @@
 
         InitializeBoards(size, boardCount, "numbers");
     }
-    public override bool CalculateComMove(Computer com)
+
+    public override bool CalculateComMove(Computer com, out Move move)
     {
-        Square? sq = null;
-        Piece? p = null;
+        Square sq = null;
+        Piece p = null;
 
         //Build a list of lines that have one space free/almost full        
         var AlmostFullLines = GetBoards()
@@ -74,10 +75,10 @@
         {
             foreach (Square[] line in AlmostFullLines)
             {
-                int lineSum = line.Aggregate(0, (acc, el) => el.IsOccupied ? GetPieceValueForSquareAsInt(el) + acc : acc);
+                int lineSum = line.Aggregate(0, (acc, el) => el.IsOccupied ? GetPieceValueForSquareAsInt(el.SquareID) + acc : acc);
                 int requires = targetNumber - lineSum;
 
-                Piece? requiredPiece = com.PiecesAvailable.FirstOrDefault(el => int.Parse(el.Value) == requires);
+                Piece requiredPiece = com.PiecesAvailable.FirstOrDefault(el => int.Parse(el.Value) == requires);
 
                 if(requiredPiece != null)
                 {
@@ -86,13 +87,16 @@
                     sq = emptySpace;
                     p = requiredPiece;
 
-                    p.Place(sq);
+                    p.Place(sq.SquareID);
+                    sq.IsOccupied = true;
 
+                    move = new Move { PieceID = p.PieceID, SquareID = sq.SquareID };
                     return true;
                 }
             }
         }
 
+        move = null;
         return false;
     }
 }

@@ -1,23 +1,58 @@
-using Microsoft.VisualBasic;
-
-class Piece(string val, IGameContext gameContext, int ownerPosition)
+class Piece
 {
-    protected IGameContext GameContext = gameContext;
-    public string Value = val;
-    public Square? Location { get; private set; }
-    public int OwnerPosition = ownerPosition;
+    static private int lastPieceID = 0;
+    protected IGameContext GameContext;
 
-    public void Place(Square sq)
+    public int PieceID = ++lastPieceID;
+    public string Value { get; set; }
+    public int LocationSquareID { get; private set; } = -1;
+    public int OwnerPosition { get; }
+
+    public Piece(string val, IGameContext gameContext, int ownerPosition)
     {
-        Location = sq;
-        sq.IsOccupied = true;
+        Value = val;
+        GameContext = gameContext;
+        OwnerPosition = ownerPosition;
+    }
+
+    public Piece(IGameContext gameContext, string state)
+    {
+        this.GameContext = gameContext;
+        string[] values;
+        try
+        {
+            values = state.Split('|');
+            PieceID = Convert.ToInt32(values[0]);
+            Value = values[1];
+            OwnerPosition = Convert.ToInt32(values[2]);
+            LocationSquareID = Convert.ToInt32(values[3]);
+        }
+        catch
+        {
+            throw new DeserialisationException($"Invalid format deserialising {nameof(Piece)}");
+        }
+    }
+
+    public string CaptureState()
+    {
+        return $"{PieceID}|{Value}|{OwnerPosition}|{LocationSquareID}";
+    }
+
+    public void Place(int squareID)
+    {
+        LocationSquareID = squareID;
+    }
+
+    public void Unplace()
+    {
+        LocationSquareID = -1;
     }
 }
 
 class Cursor(string val, IGameContext gameContext, int ownerPosition) : Piece(val, gameContext, ownerPosition)
 {
     private static readonly string[] ValidDirections = ["left", "right", "up", "down", "next", "prev"];
-    public Square? Location { get; set; }
+    public Square Location { get; set; }
     public void MoveLocation(string direction)
     {
         if (!ValidDirections.Contains(direction)) return;
@@ -25,7 +60,7 @@ class Cursor(string val, IGameContext gameContext, int ownerPosition) : Piece(va
         var Board = this.GameContext.GetBoard(currentBoard); 
         int cur = Array.IndexOf(Board.SquaresAvailable, this.Location);
         // 1. Get available squares in relevant row or column 2. Filter by are greater or less than current position based on direction selected 3. orders them by size based on direction selected 4. set the first available as the new square
-        Square? moveTo = direction switch {
+        Square moveTo = direction switch {
             "left"  => Board.SquaresAvailable.Where(x => x.Row == this.Location.Row && x.Col < this.Location.Col).OrderByDescending(x => x.Col).FirstOrDefault(),
             "right" => Board.SquaresAvailable.Where(x => x.Row == this.Location.Row && x.Col > this.Location.Col).OrderBy(x => x.Col).FirstOrDefault(),
             "up"    => Board.SquaresAvailable.Where(x => x.Row < this.Location.Row && x.Col == this.Location.Col).OrderByDescending(x => x.Row).FirstOrDefault(),
@@ -39,7 +74,7 @@ class Cursor(string val, IGameContext gameContext, int ownerPosition) : Piece(va
         else if (direction is "next" or "prev") Console.WriteLine("That would take you off the board, try again.");
     }
 
-     public void MoveBoard(int boardID)
+    public void MoveBoard(int boardID)
     {
         var currentBoard = this.Location.BoardID;
         if(currentBoard == boardID) return;

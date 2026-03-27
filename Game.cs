@@ -1,6 +1,3 @@
-using System.ComponentModel.Design;
-using System.Reflection.Metadata;
-
 abstract class Game : IGameContext
 {
     // Properties - marked as 'null!' because they are initialized in Setup()
@@ -14,9 +11,9 @@ abstract class Game : IGameContext
 
     public virtual string GameType { get; }
 
-    public string PlayerGameMode { get; private set; }
+    private PlayerFactory PlayerFactory;
 
-    private PlayerFactory playerFactory;
+    private MoveHistory MoveHistory;
 
     // Expression-bodied properties for cleaner logic
     public Player WhoseTurn => TurnNumber % 2 == 0 ? Player2 : Player1;
@@ -24,13 +21,68 @@ abstract class Game : IGameContext
 
     public Game()
     {
-        this.playerFactory = new PlayerFactory(this);
+        this.PlayerFactory = new PlayerFactory(this);
+        this.MoveHistory = new MoveHistory();
     }
 
     public Game(GameStateMemento state) : this()
     {
-        this.Player1 = this.playerFactory.CreateFromState(state.Player1Type, 1);
-        this.Player2 = this.playerFactory.CreateFromState(state.Player2Type, 2);
+        int boardCount = 0;
+        int pieceCount = 0;
+        string[] boardValues = null;
+        string[] pieceValues = null;
+        try
+        {
+            boardValues = state.Boards.Split('_');
+            boardCount = Convert.ToInt32(boardValues[0]);
+            pieceValues = state.Pieces.Split(',');
+            pieceCount = Convert.ToInt32(pieceValues[0]);
+        }
+        catch
+        {
+            throw new DeserialisationException($"Invalid format deserialising {nameof(Game)}");
+        }
+
+        if (boardValues.Length != boardCount + 1 || pieceValues.Length != pieceCount + 1)
+        {
+            throw new DeserialisationException($"Invalid format deserialising {nameof(Game)}'s boards and pieces");
+        }
+
+        this.Player1 = this.PlayerFactory.CreateFromState(state.Player1Type, 1);
+        this.Player2 = this.PlayerFactory.CreateFromState(state.Player2Type, 2);
+        this.TurnNumber = state.TurnNumber;
+
+        this.Boards = new Board[boardCount];
+        for (int i = 0; i < boardCount; i++)
+            this.Boards[i] = new Board(boardValues[i + 1]); // offset by 1 because of length value at start of string
+
+        this.Pieces = new Piece[pieceCount];
+        for (int i = 0; i < pieceCount; i++)
+            this.Pieces[i] = new Piece(this, pieceValues[i + 1]); // offset by 1 because of length value at start of string
+    }
+
+    public GameStateMemento CaptureState()
+    {
+        string boardState = $"{this.Boards.Length}";
+        for (int boardCount = 0; boardCount < Boards.Length; boardCount++)
+            boardState += $"_{this.Boards[boardCount].CaptureState()}";
+
+        string pieceState = $"{this.Pieces.Length}";
+        for (int pieceCount = 0; pieceCount < Pieces.Length; pieceCount++)
+            pieceState += $",{this.Pieces[pieceCount].CaptureState()}";
+
+        var state = new GameStateMemento
+        {
+            GameType = this.GameType,
+            Boards = boardState,
+            Pieces = pieceState,
+            TurnNumber = this.TurnNumber,
+            Player1Type = this.Player1.CaptureState(),
+            Player2Type = this.Player2.CaptureState(),
+            MoveHistory = this.MoveHistory.CaptureState()
+        };
+
+        return state;
     }
 
     public void StartGame()
@@ -62,10 +114,9 @@ abstract class Game : IGameContext
         }
 
 
-        this.Player1 = this.playerFactory.CreateHumanPlayer(1);
-        bool p2IsHuman = (mode == 1);
-        this.PlayerGameMode = p2IsHuman ? "HvH" : "HvC";
-        this.Player2 = p2IsHuman ? this.playerFactory.CreateHumanPlayer(2) : this.playerFactory.CreateComputerPlayer(2);
+        this.Player1 = this.PlayerFactory.CreateHumanPlayer(1);
+        bool p2IsHuman = mode == 1;
+        this.Player2 = p2IsHuman ? this.PlayerFactory.CreateHumanPlayer(2) : this.PlayerFactory.CreateComputerPlayer(2);
         
         Console.Clear();
         Console.WriteLine($"-- Game Started: Human v {(p2IsHuman ? "Human" : "Computer")} --");
@@ -76,34 +127,13 @@ abstract class Game : IGameContext
         // TODO stub for now
     }
 
-    public virtual GameStateMemento CaptureState()
-    {
-        var state = new GameStateMemento
-        {
-            GameType = GameType,
-            BoardSize = this.Boards[0].Size,
-            BoardCount = this.Boards.Length,
-            CurrentPlayerIndex = WhoseTurn == this.Player1 ? 1 : 2,
-            Player1Type = this.Player1.CaptureState(),
-            Player2Type = this.Player2.CaptureState(),
-
-            // TODO serialize history
-            //MoveHistory = History.GetAll(),
-            //HistoryPointer = History.Pointer
-        };
-
-        foreach (var board in Boards)
-            state.BoardValues.AddRange(board.Squares.Select(s => GetPieceValueForSquareAsInt(s).ToString() ?? "").ToList());
-
-        return state;
-    }
-
     public void PerformTurn()
     {
         DrawBoards();
         Console.WriteLine($"Turn {TurnNumber}: Player {WhoseTurn.Position}'s move.");
 
-        WhoseTurn.DoMove();
+        Move move = WhoseTurn.DoMove();
+        this.MoveHistory.StoreNewMove(move);
         ResolveTurn();
 
         if (!Finished)
@@ -116,14 +146,14 @@ abstract class Game : IGameContext
         }
     }
 
-    public string GetPieceValueForSquare(Square square)
+    public string GetPieceValueForSquare(int squareID)
     {
-        return this.Pieces.FirstOrDefault(p => p.Location == square)?.Value ?? "-";
+        return this.Pieces.FirstOrDefault(p => p.LocationSquareID == squareID)?.Value ?? "-";
     }
 
-    public int GetPieceValueForSquareAsInt(Square square)
+    public int GetPieceValueForSquareAsInt(int squareID)
     {
-        var piece = this.Pieces.FirstOrDefault(p => p.Location == square);
+        var piece = this.Pieces.FirstOrDefault(p => p.LocationSquareID == squareID);
         return piece != null ? int.Parse(piece.Value) : 0;
     }
 
@@ -172,7 +202,7 @@ abstract class Game : IGameContext
                 else
                 {   
                     Console.ResetColor();
-                    Console.Write($"({GetPieceValueForSquare(board.Squares[i])})");
+                    Console.Write($"({GetPieceValueForSquare(board.Squares[i].SquareID)})");
                 }
                 if((i + 1) % board.Size == 0) Console.Write("\n");
             }
@@ -191,6 +221,7 @@ abstract class Game : IGameContext
 
     public Square[] AllAvailableSquares => GetBoards().SelectMany(board => board.SquaresAvailable).ToArray();
     public List<Square[]> AllFullLines => GetBoards().SelectMany(board => board.FullLines).ToList();
+    public List<Square> AllSquares => GetBoards().SelectMany(board => board.AllSquares).ToList();
 
     protected abstract void InitializeGameBoards();
     protected void InitializeBoards(int size, int boardCount, string pieceType)
@@ -222,7 +253,7 @@ abstract class Game : IGameContext
         }
         
     }
-    public abstract bool CalculateComMove(Computer com);
+    public abstract bool CalculateComMove(Computer com, out Move move);
 
     public string PlayerMoveInstructions()
     {
@@ -236,5 +267,38 @@ abstract class Game : IGameContext
 
         return MoveInstructions;
     }
-                
+     
+    public void UndoMove()
+    {
+        Move move = this.MoveHistory.GetPreviousMove();
+        Piece pieceToUnplace = this.Pieces.FirstOrDefault(p => p.PieceID == move.PieceID);
+        Square squareToUnoccupy = AllSquares.FirstOrDefault(sq => sq.SquareID == move.SquareID);
+        if (pieceToUnplace is null)
+        {
+            throw new MoveHistoryException("Piece not found!");
+        }
+
+        TurnNumber--;
+        pieceToUnplace.Unplace();
+        squareToUnoccupy.IsOccupied = false;
+
+        DrawBoards();
+    }
+
+    public void RedoMove()
+    {
+        Move move = this.MoveHistory.GetNextMove();
+        Piece pieceToPlace = this.Pieces.FirstOrDefault(p => p.PieceID == move.PieceID);
+        Square squareToOccupy = AllSquares.FirstOrDefault(sq => sq.SquareID == move.SquareID);
+        if (squareToOccupy is null || pieceToPlace is null)
+        {
+            throw new MoveHistoryException("Piece/square not found!");
+        }
+
+        TurnNumber++;
+        pieceToPlace.Place(squareToOccupy.SquareID);
+        squareToOccupy.IsOccupied = true;
+
+        DrawBoards();
+    }
 }

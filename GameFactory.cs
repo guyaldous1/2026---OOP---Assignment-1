@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-
-
-// ============================================================
+﻿// ============================================================
 // GAME FACTORY - Factory pattern
 // ============================================================
 static class GameFactory
@@ -30,6 +24,6 @@ static class GameFactory
             _ => throw new ArgumentException($"Unknown game type: {state.GameType}")
         };
 
-        return game;
+        return game!;
     }
 }
