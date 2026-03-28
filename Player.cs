@@ -11,11 +11,6 @@ abstract class Player(int pos, IGameContext gameContext)
     public string CaptureState() => this is Human ? "human" : "computer";
     public ConsoleColor Colour => this.Position % 2 == 0 ? ConsoleColor.Red : ConsoleColor.Green;
 
-    protected void PlacePiece(Piece piece, Square square)
-    {
-        piece.Place(square.SquareID);
-        square.IsOccupied = true;
-    }
 }
 
 class Human : Player
@@ -79,7 +74,7 @@ class Human : Player
 
         var currentBoard = this.Cursor.Location.BoardID;    
         Square sq = GameContext.GetBoard(currentBoard).Squares.FirstOrDefault(x => x.Row == this.Cursor.Location.Row && x.Col == this.Cursor.Location.Col);
-        PlacePiece(piece, sq);
+        piece.Place(sq);
 
         //remove cursor from the board
         this.Cursor.Location = null;
@@ -110,7 +105,7 @@ class Computer(int pos, IGameContext gameContext) : Player(pos, gameContext)
                 throw new GamePlayException("Error in strategic move creation: pieces and squares state error.");
             }
 
-            PlacePiece(strategicPiece, strategicSquare);
+            strategicPiece.Place(strategicSquare);
 
             return strategicMoves[moveNum];
         }
@@ -122,7 +117,7 @@ class Computer(int pos, IGameContext gameContext) : Player(pos, gameContext)
 
         Square sq = availSquares[sqrnum];
         Piece p = PiecesAvailable[piecenum];
-        PlacePiece(p, sq);
+        p.Place(sq);
 
         return new Move { PieceID = p.PieceID, SquareID = sq.SquareID };
     }

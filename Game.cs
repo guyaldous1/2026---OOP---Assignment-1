@@ -296,8 +296,7 @@ abstract class Game : IGameContext
         }
 
         TurnNumber--;
-        pieceToUnplace.Unplace();
-        squareToUnoccupy.IsOccupied = false;
+        pieceToUnplace.Unplace(squareToUnoccupy);
 
         DrawBoards();
     }
@@ -313,8 +312,7 @@ abstract class Game : IGameContext
         }
 
         TurnNumber++;
-        pieceToPlace.Place(squareToOccupy.SquareID);
-        squareToOccupy.IsOccupied = true;
+        pieceToPlace.Place(squareToOccupy);
 
         DrawBoards();
     }
