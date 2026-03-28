@@ -71,11 +71,11 @@ class Board
         return result;
     }
 
-    public void Draw(string[] squareValues, Square cursorLocation, ConsoleColor cursorColor, string cursorValue)
+    public void Draw(string[] squareValues, int cursorRow, int cursorCol, ConsoleColor cursorColor, string cursorValue)
     {
         for (int i = 0; i < Squares.Length; i++)
         {
-            if (Squares[i] == cursorLocation)
+            if (Squares[i].Row == cursorRow && Squares[i].Col == cursorCol)
             {
                 Console.ForegroundColor = cursorColor;
                 Console.Write($"({cursorValue})");

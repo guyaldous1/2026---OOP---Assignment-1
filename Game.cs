@@ -207,8 +207,10 @@ abstract class Game : IGameContext
         {
             string[] boardValues = board.Squares.Select((_, i) => GetPieceValueForSquare(board.Squares[i].SquareID)).ToArray();
             Human human = WhoseTurn as Human;
-            Square cursorLocation = human?.Cursor.Location;
-            board.Draw(boardValues, cursorLocation, WhoseTurn.Colour, human?.Cursor.Value);
+            bool cursorIsOnThisBoard = (human?.Cursor.BoardID ?? -1) == board.BoardID;
+            int cursorRow = cursorIsOnThisBoard ? human.Cursor.Row : -1;
+            int cursorCol = cursorIsOnThisBoard ? human.Cursor.Col : -1;
+            board.Draw(boardValues, cursorRow, cursorCol, WhoseTurn.Colour, human?.Cursor.Value ?? string.Empty);
             Console.Write("\n");
         }
         

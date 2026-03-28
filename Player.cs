@@ -19,7 +19,7 @@ class Human : Player
 
     public Human(int pos, IGameContext gameContext) : base (pos, gameContext)
     {
-        Cursor = new Cursor("0", Position);
+        Cursor = new Cursor("0");
     }
 
     public override Move DoMove()
@@ -36,7 +36,8 @@ class Human : Player
         }
         
         // Initialise Cursor
-        this.Cursor.Location = GameContext.GetBoards().First(b => b.SquaresAvailable.Length > 0).SquaresAvailable[0];
+        Square startingLocation = GameContext.GetBoard(0).SquaresAvailable[0];
+        this.Cursor.SetLocation(startingLocation.BoardID, startingLocation.Row, startingLocation.Col);
         this.Cursor.Value = piece.Value;
         GameContext.DrawBoards();
         //Only accept valid inputs based on the keystrokes in this array
@@ -73,12 +74,12 @@ class Human : Player
             }
         } while (!selected);
 
-        var currentBoard = this.Cursor.Location.BoardID;    
-        Square sq = GameContext.GetBoard(currentBoard).Squares.FirstOrDefault(x => x.Row == this.Cursor.Location.Row && x.Col == this.Cursor.Location.Col);
+        var currentBoard = this.Cursor.BoardID;    
+        Square sq = GameContext.GetBoard(currentBoard).Squares.FirstOrDefault(x => x.Row == this.Cursor.Row && x.Col == this.Cursor.Col);
         piece.Place(sq);
 
         //remove cursor from the board
-        this.Cursor.Location = null;
+        this.Cursor.SetLocation(-1, -1, -1);
 
         return new Move { PieceID = piece.PieceID, SquareID = sq.SquareID };
     }
