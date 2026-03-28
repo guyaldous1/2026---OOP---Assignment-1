@@ -36,7 +36,7 @@ class Human : Player
         }
         
         // Initialise Cursor
-        this.Cursor.Location = GameContext.GetBoard(0).SquaresAvailable[0];
+        this.Cursor.Location = GameContext.GetBoards().First(b => b.SquaresAvailable.Length > 0).SquaresAvailable[0];
         this.Cursor.Value = piece.Value;
         GameContext.DrawBoards();
         //Only accept valid inputs based on the keystrokes in this array

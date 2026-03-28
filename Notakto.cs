@@ -49,39 +49,33 @@
 
     public override IEnumerable<Move> GetStrategicMoves()
     {
-        //Build a list of lines that have one space free/almost full        
-        List<Square[]> AlmostFullLines = GetBoards()
-        .SelectMany(board => board.Lines!)
-        .Where(line => line.Count(sq => sq.IsOccupied) == line.Length - 1)
-        .ToList();
-
         List<int> boardsWithFullLines = AllFullLines
             .Select(line => line[0].BoardID)
             .Distinct()
             .ToList();
 
-        Board boardIDWithWinningLine = GetBoards().FirstOrDefault(board => !boardsWithFullLines.Contains(board.BoardID));
-        if (boardIDWithWinningLine is null)
-        {
-            yield break;
-        }
+        // Squares that would complete a line on a still-live board — playing here risks losing
+        int[] dangerousSquareIDs = GetBoards()
+            .Where(board => !boardsWithFullLines.Contains(board.BoardID))
+            .SelectMany(board => board.Lines!)
+            .Where(line => line.Count(sq => sq.IsOccupied) == line.Length - 1)
+            .Select(line => line.First(sq => !sq.IsOccupied).SquareID)
+            .ToArray();
 
-        var winningLine = AlmostFullLines.FirstOrDefault(line => line[0].BoardID == boardIDWithWinningLine.BoardID);
-        if (winningLine is null)
-        {
-            yield break;
-        }
+        // Safe squares are available squares that don't complete any line
+        Square[] safeSquares = AllAvailableSquares
+            .Where(sq => !dangerousSquareIDs.Contains(sq.SquareID))
+            .ToArray();
 
-        // We return a player-agnostic collection enumeration, so we'll include one X for each player here. Players can filter by their ownerPosition.
+        if (safeSquares.Length == 0) yield break;
+
         var useablePieces = Pieces.DistinctBy(piece => piece.OwnerPosition);
 
-        if (AlmostFullLines.Count > 0 && boardsWithFullLines.Count == 2 && boardIDWithWinningLine != null && winningLine != null)
+        foreach (Square safeSquare in safeSquares)
         {
-            Square winningSpace = winningLine.First(space => !space.IsOccupied);
-
-            foreach(Piece useablePiece in useablePieces)
+            foreach (Piece useablePiece in useablePieces)
             {
-                yield return new Move { PieceID = useablePiece.PieceID, SquareID = winningSpace.SquareID };
+                yield return new Move { PieceID = useablePiece.PieceID, SquareID = safeSquare.SquareID };
             }
         }
     }
