@@ -1,4 +1,6 @@
 
+using System.IO.Pipelines;
+
 abstract class Player(int pos, IGameContext gameContext)
 {
     public int Position = pos;
@@ -8,6 +10,12 @@ abstract class Player(int pos, IGameContext gameContext)
     public abstract Move DoMove();
     public string CaptureState() => this is Human ? "human" : "computer";
     public ConsoleColor Colour => this.Position % 2 == 0 ? ConsoleColor.Red : ConsoleColor.Green;
+
+    protected void PlacePiece(Piece piece, Square square)
+    {
+        piece.Place(square.SquareID);
+        square.IsOccupied = true;
+    }
 }
 
 class Human : Player
@@ -71,9 +79,8 @@ class Human : Player
 
         var currentBoard = this.Cursor.Location.BoardID;    
         Square sq = GameContext.GetBoard(currentBoard).Squares.FirstOrDefault(x => x.Row == this.Cursor.Location.Row && x.Col == this.Cursor.Location.Col);
-        //Place Piece
-        piece.Place(sq.SquareID);
-        sq.IsOccupied = true;
+        PlacePiece(piece, sq);
+
         //remove cursor from the board
         this.Cursor.Location = null;
 
@@ -81,26 +88,41 @@ class Human : Player
     }
 }
 
-class Computer(int pos, IGameContext Game) : Player(pos, Game)
+class Computer(int pos, IGameContext gameContext) : Player(pos, gameContext)
 {
-    public override Move DoMove() {
-        if (GameContext.CalculateComMove(this, out Move move))
+    public override Move DoMove()
+    {
+        var availSquares = GameContext.AllAvailableSquares;
+
+        Move[] strategicMoves = GameContext.GetStrategicMoves()
+            .Where(move => PiecesAvailable.Any(piece => piece.PieceID == move.PieceID))
+            .ToArray();
+        if (strategicMoves.Length > 0)
         {
-            return move;
+            Random strategicMoveRng = new Random();
+            int moveNum = strategicMoveRng.Next(0, strategicMoves.Length);
+
+            Move strategicMove = strategicMoves[moveNum];
+            Piece strategicPiece = PiecesAvailable.FirstOrDefault(piece => piece.PieceID == strategicMove.PieceID);
+            Square strategicSquare = availSquares.FirstOrDefault(square => square.SquareID == strategicMove.SquareID);
+            if (strategicPiece is null || strategicSquare is null)
+            {
+                throw new GamePlayException("Error in strategic move creation: pieces and squares state error.");
+            }
+
+            PlacePiece(strategicPiece, strategicSquare);
+
+            return strategicMoves[moveNum];
         }
 
-        // no winning move is found, get available squares, and randomly pick a piece to place in a random square 
-        var availSqurares = GameContext.AllAvailableSquares;
+        // no strategic move is found, randomly pick a piece to place in a random square 
+        Random randomMoveRng = new Random();
+        int sqrnum = randomMoveRng.Next(0, availSquares.Length);
+        int piecenum = randomMoveRng.Next(0, PiecesAvailable.Length);
 
-        Random rng = new Random();
-        int sqrnum = rng.Next(0, availSqurares.Length);
-        int piecenum = rng.Next(0, PiecesAvailable.Length);
-
-        Square sq = availSqurares[sqrnum];
+        Square sq = availSquares[sqrnum];
         Piece p = PiecesAvailable[piecenum];
-
-        p.Place(sq.SquareID);
-        sq.IsOccupied = true;
+        PlacePiece(p, sq);
 
         return new Move { PieceID = p.PieceID, SquareID = sq.SquareID };
     }

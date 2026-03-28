@@ -12,6 +12,6 @@ interface IGameContext
     string GetPieceValueForSquare(int squareID);
     int GetPieceValueForSquareAsInt(int squareID);
     void DrawBoards();
-    bool CalculateComMove(Computer com, out Move move);
+    IEnumerable<Move> GetStrategicMoves();
     string PlayerMoveInstructions();
 }
