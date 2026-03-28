@@ -124,7 +124,21 @@ abstract class Game : IGameContext
 
     public void ShowHelp()
     {
-        // TODO stub for now
+
+        Console.Clear();
+
+        Console.WriteLine("---Game Instructions---");
+        GameSpecificHelp();
+
+        Console.WriteLine("\n---Help Menu---");
+        Console.WriteLine("\nYou can use any of the following commands to interact with this menu");
+        
+        Console.WriteLine("turn - return to the game");
+        Console.WriteLine("load - load a different saved game file");
+        Console.WriteLine("save - save the current game for later");
+        Console.WriteLine("undo - undo the turn you just made");
+        Console.WriteLine("redo - redo the any number of turns you've just undone");
+        Console.WriteLine("quit - abandon the game and quit the program without saving");
     }
 
     public void PerformTurn()
@@ -160,6 +174,7 @@ abstract class Game : IGameContext
     public abstract void ResolveTurn();
 
     public abstract void ShowRuleForTurn();
+    protected abstract void GameSpecificHelp();
 
     private void DrawPlayerPieces(Player player)
     {

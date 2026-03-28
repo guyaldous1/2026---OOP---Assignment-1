@@ -61,9 +61,6 @@
 
     public override IEnumerable<Move> GetStrategicMoves()
     {
-        Square sq = null;
-        Piece p = null;
-
         //Build a list of lines that have one space free/almost full        
         List<Square[]> AlmostFullLines = GetBoards()
             .SelectMany(board => board.Lines)
@@ -86,5 +83,10 @@
                 }
             }
         }
+    }
+
+    protected override void GameSpecificHelp()
+    {
+     Console.WriteLine($"You are playing a game of Numerical TicTacToe. The first player to create a complete column, row or diagonal matching the target number {targetNumber} wins!");
     }
 }
