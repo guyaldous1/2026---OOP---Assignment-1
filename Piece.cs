@@ -38,14 +38,16 @@ class Piece
         return $"{PieceID}|{Value}|{OwnerPosition}|{LocationSquareID}";
     }
 
-    public void Place(int squareID)
+    public void Place(Square square)
     {
-        LocationSquareID = squareID;
+        LocationSquareID = square.SquareID;
+        square.IsOccupied = true;
     }
 
-    public void Unplace()
+    public void Unplace(Square square)
     {
         LocationSquareID = -1;
+        square.IsOccupied = false;
     }
 }
 

@@ -35,7 +35,7 @@
 
     public override void ShowRuleForTurn()
     {
-        Console.WriteLine($"Place an X to be the first to create a row of 3 in each board");
+        Console.WriteLine($"The player who places the final X to complete a line on all three boards loses.");
     }
 
     protected override void InitializeGameBoards()
@@ -84,5 +84,9 @@
                 yield return new Move { PieceID = useablePiece.PieceID, SquareID = winningSpace.SquareID };
             }
         }
+    }
+    protected override void GameSpecificHelp()
+    {
+     Console.WriteLine("You are playing a game of Notakto. The first player to create a complete column, row or diagonal on each board loses.");
     }
 }

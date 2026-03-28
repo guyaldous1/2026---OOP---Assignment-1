@@ -86,4 +86,8 @@ class Gomoku : Game
             }
         }
     }
+    protected override void GameSpecificHelp()
+    {
+     Console.WriteLine("You are playing a game of Gomoku. The first player to create a row, column or diagonal of exactly 5 of their pieces wins! 6 and above doesn't end the game.");
+    }
 }

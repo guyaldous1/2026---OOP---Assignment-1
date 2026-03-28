@@ -96,15 +96,24 @@ class Program
                     break;
             }
             
-
             if (!finished)
-                command = game.WhoseTurn is Human ? GetCommand().ToLower() : "turn";
+                command = game.WhoseTurn is Human ? GetCommand(command).ToLower() : "turn";
         }
     }
 
-    static private string GetCommand()
+    static private string GetCommand(string currentCommand)
     {
-        Console.Write("Enter command (Enter for next turn, \"help\" for game instructions)" + Environment.NewLine + "> ");
+        string helptext = "\n";
+
+        if(currentCommand == "turn")
+            helptext += "Press Enter for next turn or ";
+
+        helptext += "Type a command and press Enter";
+
+        if(currentCommand == "turn")
+            helptext += "\n(use 'help' for rules and a list of available commands)";
+
+        Console.Write($"{helptext}" + Environment.NewLine + "> ");
         string command = Console.ReadLine();
         return string.IsNullOrWhiteSpace(command) ? "turn" : command;
     }
@@ -112,7 +121,8 @@ class Program
     static private void SaveGame(Game game)
     {
         string json = JsonSerializer.Serialize(game.CaptureState(), new JsonSerializerOptions { WriteIndented = true });
-        string filename = $"savegame_{game.GameType}_{DateTime.Now:yyyyMMdd_HHmmss}.json";
+        Directory.CreateDirectory("saves");
+        string filename = Path.Combine("saves", $"savegame_{game.GameType}_{DateTime.Now:yyyyMMdd_HHmmss}.json");
         File.WriteAllText(filename, json);
         Console.WriteLine($"  💾 Game saved to {filename}");
     }
@@ -120,7 +130,7 @@ class Program
     static private Game LoadGame()
     {
         // Check for saved games
-        var saveFiles = Directory.GetFiles(".", "savegame_*.json").OrderByDescending(f => f).ToArray();
+        var saveFiles = Directory.Exists("saves") ? Directory.GetFiles("saves", "savegame_*.json").OrderByDescending(f => f).ToArray() : [];
         Game game = null;
 
         if (saveFiles.Length == 0)
