@@ -15,7 +15,7 @@ abstract class Player(int pos, IGameContext gameContext)
 
 class Human : Player
 {
-    public Cursor Cursor;
+    public Cursor Cursor { get; }
 
     public Human(int pos, IGameContext gameContext) : base (pos, gameContext)
     {
