@@ -36,7 +36,7 @@ class Human : Player
         }
         
         // Initialise Cursor
-        Square startingLocation = GameContext.GetBoard(0).SquaresAvailable[0];
+        Square startingLocation = GameContext.GetBoards().First(b => b.SquaresAvailable.Length > 0).SquaresAvailable[0];
         this.Cursor.SetLocation(startingLocation.BoardID, startingLocation.Row, startingLocation.Col);
         this.Cursor.Value = piece.Value;
         GameContext.DrawBoards();

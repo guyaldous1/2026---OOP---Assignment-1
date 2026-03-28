@@ -48,10 +48,11 @@ class Cursor
     public void MoveBoard(int boardID, Board[] boards)
     {
         if (this.BoardID == boardID) return;
-        var FirstSquare = boards[boardID].SquaresAvailable[0];
+        if (boards[boardID].SquaresAvailable.Length == 0) return;
 
-        this.BoardID = FirstSquare.BoardID;
-        this.Row = FirstSquare.Row;
-        this.Col = FirstSquare.Col;
+        var firstSquare = boards[boardID].SquaresAvailable[0];
+        this.BoardID = firstSquare.BoardID;
+        this.Row = firstSquare.Row;
+        this.Col = firstSquare.Col;
     }
 }
