@@ -53,35 +53,30 @@ class Gomoku : Game
 
     public override IEnumerable<Move> GetStrategicMoves()
     {
-        string[] availablePieceValues = ["O","X"];
-        foreach (string pieceValue in availablePieceValues)
+        Piece[] currentPlayerPieces = WhoseTurn.PiecesAvailable;
+        string pieceValue = currentPlayerPieces.FirstOrDefault()?.Value;
+        if (pieceValue == null) yield break;
+
+        //Find patterns of 4 but not 5
+        string pattern = pieceValue == "O" ? "-OOOO|OOOO-" : "-XXXX|XXXX-";
+
+        foreach (Square[] line in Boards[0].Lines)
         {
-            //Find patterns of 4 but not 5   
-            string pattern = pieceValue == "O" ? "-OOOO|OOOO-" : "-XXXX|XXXX-";
+            string lineString = string.Concat(line.Select(sq => GetPieceValueForSquare(sq.SquareID)));
+            Match match = Regex.Match(lineString, pattern);
 
-            // We return a player-agnostic collection enumeration, so we'll include one X and one O for each player here. Players can filter by their ownerPosition.
-            IEnumerable<Piece> useablePieces = Pieces
-                .Where(piece => piece.Value == pieceValue)
-                .DistinctBy(piece => (piece.OwnerPosition, piece.Value));
-
-            foreach (Square[] line in Boards[0].Lines)
+            if (match.Success)
             {
-                string lineString = string.Concat(line.Select(sq => GetPieceValueForSquare(sq.SquareID)));
-                Match match = Regex.Match(lineString, pattern);
+                // Find the index of the '-' within the matched part and select that as the winning square
+                int dashIndex = match.Value.StartsWith('-')
+                    ? match.Index
+                    : match.Index + 4;
 
-                if (match.Success)
+                Square winningSquare = line[dashIndex];
+
+                foreach (Piece piece in currentPlayerPieces)
                 {
-                    // Find the index of the '-' within the matched part and select that as the winning square
-                    int dashIndex = match.Value.StartsWith("-")
-                        ? match.Index
-                        : match.Index + 4;
-
-                    Square winningSquare = line[dashIndex];
-
-                    foreach (Piece piece in useablePieces)
-                    {
-                        yield return new Move { PieceID = piece.PieceID, SquareID = winningSquare.SquareID };
-                    }
+                    yield return new Move { PieceID = piece.PieceID, SquareID = winningSquare.SquareID };
                 }
             }
         }

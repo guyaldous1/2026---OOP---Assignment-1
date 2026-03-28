@@ -69,13 +69,11 @@
 
         if (safeSquares.Length == 0) yield break;
 
-        var useablePieces = Pieces.DistinctBy(piece => piece.OwnerPosition);
-
         foreach (Square safeSquare in safeSquares)
         {
-            foreach (Piece useablePiece in useablePieces)
+            foreach (Piece piece in WhoseTurn.PiecesAvailable)
             {
-                yield return new Move { PieceID = useablePiece.PieceID, SquareID = safeSquare.SquareID };
+                yield return new Move { PieceID = piece.PieceID, SquareID = safeSquare.SquareID };
             }
         }
     }
