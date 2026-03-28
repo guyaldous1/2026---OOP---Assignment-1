@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 abstract class Game : IGameContext
 {
     // Properties - marked as 'null!' because they are initialized in Setup()
@@ -187,25 +189,10 @@ abstract class Game : IGameContext
         //write each board layout
         foreach (Board board in this.Boards)
         {
-            for (int i = 0; i < board.Squares.Length; i++)
-            {
-                if(WhoseTurn is Human human && human.Cursor.Location == board.Squares[i])
-                {
-                    Console.ForegroundColor = WhoseTurn.Colour;
-                    Console.Write($"({human.Cursor.Value})");
-                }
-                else if(!board.Squares[i].IsOccupied)
-                {
-                    Console.ResetColor();
-                    Console.Write($"( )");
-                }
-                else
-                {   
-                    Console.ResetColor();
-                    Console.Write($"({GetPieceValueForSquare(board.Squares[i].SquareID)})");
-                }
-                if((i + 1) % board.Size == 0) Console.Write("\n");
-            }
+            string[] boardValues = board.Squares.Select((_, i) => GetPieceValueForSquare(board.Squares[i].SquareID)).ToArray();
+            Human human = WhoseTurn as Human;
+            Square cursorLocation = human?.Cursor.Location;
+            board.Draw(boardValues, cursorLocation, WhoseTurn.Colour, human?.Cursor.Value);
             Console.Write("\n");
         }
         

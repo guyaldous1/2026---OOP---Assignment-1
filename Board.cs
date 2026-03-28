@@ -70,4 +70,27 @@ class Board
             result += $",{Squares[squarePos].CaptureState()}";
         return result;
     }
+
+    public void Draw(string[] squareValues, Square cursorLocation, ConsoleColor cursorColor, string cursorValue)
+    {
+        for (int i = 0; i < Squares.Length; i++)
+        {
+            if (Squares[i] == cursorLocation)
+            {
+                Console.ForegroundColor = cursorColor;
+                Console.Write($"({cursorValue})");
+            }
+            else if (!Squares[i].IsOccupied)
+            {
+                Console.ResetColor();
+                Console.Write($"( )");
+            }
+            else
+            {
+                Console.ResetColor();
+                Console.Write($"({squareValues[i]})");
+            }
+            if ((i + 1) % Size == 0) Console.Write("\n");
+        }
+    }
 }
