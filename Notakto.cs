@@ -69,12 +69,10 @@
 
         if (safeSquares.Length == 0) yield break;
 
+        Piece piece = WhoseTurn.PiecesAvailable.First();
         foreach (Square safeSquare in safeSquares)
         {
-            foreach (Piece piece in WhoseTurn.PiecesAvailable)
-            {
-                yield return new Move { PieceID = piece.PieceID, SquareID = safeSquare.SquareID };
-            }
+            yield return new Move { PieceID = piece.PieceID, SquareID = safeSquare.SquareID };
         }
     }
     protected override void GameSpecificHelp()

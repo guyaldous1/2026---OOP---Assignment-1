@@ -74,10 +74,7 @@ class Gomoku : Game
 
                 Square winningSquare = line[dashIndex];
 
-                foreach (Piece piece in currentPlayerPieces)
-                {
-                    yield return new Move { PieceID = piece.PieceID, SquareID = winningSquare.SquareID };
-                }
+                yield return new Move { PieceID = currentPlayerPieces.First().PieceID, SquareID = winningSquare.SquareID };
             }
         }
     }
