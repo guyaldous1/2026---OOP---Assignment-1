@@ -1,6 +1,7 @@
 ﻿class TicTacToe : Game
 {
     public override string GameType => "tictactoe";
+    public override bool PlayerSelectsPiece => true;
 
     private int targetNumber => Boards[0].Size * (Boards[0].Size * Boards[0].Size + 1) / 2;
 
