@@ -14,4 +14,5 @@ interface IGameContext
     void DrawBoards();
     IEnumerable<Move> GetStrategicMoves();
     string PlayerMoveInstructions();
+    bool PlayerSelectsPiece { get; }
 }

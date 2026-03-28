@@ -19,14 +19,14 @@ class Human : Player
 
     public Human(int pos, IGameContext gameContext) : base (pos, gameContext)
     {
-        Cursor = new Cursor("0", gameContext, Position);
+        Cursor = new Cursor("0", Position);
     }
 
     public override Move DoMove()
     {
         Console.ResetColor();
         //Select A Piece or force one for non neumerical games
-        Piece piece = GameContext.GameType != "tictactoe" ? PiecesAvailable.FirstOrDefault() : null;
+        Piece piece = GameContext.PlayerSelectsPiece ? null : PiecesAvailable.FirstOrDefault();
         while (piece == null)
         {
             Console.WriteLine($"Player {this.Position}, enter the number of the piece you'd like to use and press enter to confirm:");
@@ -50,17 +50,18 @@ class Human : Player
             key = Console.ReadKey(true);
             if (validKeys.Contains(key.Key)){
 
-                if(key.Key == ConsoleKey.LeftArrow)  this.Cursor.MoveLocation("left");
-                if(key.Key == ConsoleKey.RightArrow) this.Cursor.MoveLocation("right");
-                if(key.Key == ConsoleKey.UpArrow)    this.Cursor.MoveLocation("up");
-                if(key.Key == ConsoleKey.DownArrow)  this.Cursor.MoveLocation("down");
-                if(key.Key == ConsoleKey.N) this.Cursor.MoveLocation("prev");
-                if(key.Key == ConsoleKey.M) this.Cursor.MoveLocation("next");
+                Board[] boards = GameContext.GetBoards();
+                if(key.Key == ConsoleKey.LeftArrow)  this.Cursor.MoveLocation("left", boards);
+                if(key.Key == ConsoleKey.RightArrow) this.Cursor.MoveLocation("right", boards);
+                if(key.Key == ConsoleKey.UpArrow)    this.Cursor.MoveLocation("up", boards);
+                if(key.Key == ConsoleKey.DownArrow)  this.Cursor.MoveLocation("down", boards);
+                if(key.Key == ConsoleKey.N) this.Cursor.MoveLocation("prev", boards);
+                if(key.Key == ConsoleKey.M) this.Cursor.MoveLocation("next", boards);
 
                 //move boards with numbers keys if possible
-                if(key.Key == ConsoleKey.D1) this.Cursor.MoveBoard(0);
-                if(key.Key == ConsoleKey.D2 && GameContext.GetBoards().Length > 1) this.Cursor.MoveBoard(1);
-                if(key.Key == ConsoleKey.D3 && GameContext.GetBoards().Length > 1) this.Cursor.MoveBoard(2);
+                if(key.Key == ConsoleKey.D1) this.Cursor.MoveBoard(0, boards);
+                if(key.Key == ConsoleKey.D2 && boards.Length > 1) Cursor.MoveBoard(1, boards);
+                if(key.Key == ConsoleKey.D3 && boards.Length > 1) Cursor.MoveBoard(2, boards);
 
                 if(key.Key == ConsoleKey.Enter)      selected = true;
 

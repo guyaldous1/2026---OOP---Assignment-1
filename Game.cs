@@ -12,6 +12,7 @@ abstract class Game : IGameContext
     public bool Finished { get; protected set; } = false;
 
     public virtual string GameType { get; }
+    public virtual bool PlayerSelectsPiece => false;
 
     private PlayerFactory PlayerFactory;
 
@@ -60,7 +61,7 @@ abstract class Game : IGameContext
 
         this.Pieces = new Piece[pieceCount];
         for (int i = 0; i < pieceCount; i++)
-            this.Pieces[i] = new Piece(this, pieceValues[i + 1]); // offset by 1 because of length value at start of string
+            this.Pieces[i] = new Piece(pieceValues[i + 1]); // offset by 1 because of length value at start of string
     }
 
     public GameStateMemento CaptureState()
@@ -248,7 +249,7 @@ abstract class Game : IGameContext
             };
 
             int ownerPosition = (i % 2 == 0) ? 1 : 2;
-            Pieces[i] = new Piece(val, this, ownerPosition);
+            Pieces[i] = new Piece(val, ownerPosition);
         }
         
     }
