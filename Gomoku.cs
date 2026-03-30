@@ -11,11 +11,11 @@ class Gomoku : Game
     public Gomoku(GameStateMemento state): base(state)
     {
     }
+    
     List<string> LineStrings => Boards[0].Lines.Select(line => string.Concat(line.Select(sq => GetPieceValueForSquare(sq.SquareID)))).ToList();
+    
     public override void ResolveTurn()
     {
-        DrawBoards();
-
         string Xpattern = @"(?<!X)XXXXX(?!X)";
         string Opattern = @"(?<!O)OOOOO(?!O)";
 

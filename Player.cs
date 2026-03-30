@@ -64,9 +64,10 @@ class Human : Player
                 if(key.Key == ConsoleKey.D2 && boards.Length > 1) Cursor.MoveBoard(1, boards);
                 if(key.Key == ConsoleKey.D3 && boards.Length > 1) Cursor.MoveBoard(2, boards);
 
-                if(key.Key == ConsoleKey.Enter)      selected = true;
-
-                GameContext.DrawBoards();
+                if(key.Key == ConsoleKey.Enter)
+                    selected = true;
+                else
+                    GameContext.DrawBoards(); // cursor draw
             }
             else
             {
