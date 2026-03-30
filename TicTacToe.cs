@@ -15,6 +15,8 @@
 
     public override void ResolveTurn()
     {
+        DrawBoards();
+
         foreach (Square[] line in this.Boards[0].Lines)
         {
             bool isFull = Array.TrueForAll(line, el => el.IsOccupied);

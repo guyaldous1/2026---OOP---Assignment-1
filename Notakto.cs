@@ -12,6 +12,8 @@
 
     public override void ResolveTurn()
     {
+        DrawBoards();
+
         List<int> boardsWithFullLines = AllFullLines
             .Select(line => line[0].BoardID)
             .Distinct()                      

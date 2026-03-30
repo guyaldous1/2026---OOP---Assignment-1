@@ -93,7 +93,6 @@ abstract class Game : IGameContext
         Console.Clear();
         InitializePlayers();
         InitializeGameBoards();
-        DrawBoards();
     }
 
     public void EndGame()
@@ -128,6 +127,7 @@ abstract class Game : IGameContext
 
     public void ShowHelp()
     {
+
         Console.Clear();
 
         Console.WriteLine("---Game Instructions---");
@@ -146,11 +146,10 @@ abstract class Game : IGameContext
 
     public void PerformTurn()
     {
+        DrawBoards();
         Console.WriteLine($"Turn {TurnNumber}: Player {WhoseTurn.Position}'s move.");
 
-        DrawBoards();
         Move move = WhoseTurn.DoMove();
-        DrawBoards();
         this.MoveHistory.StoreNewMove(move);
         ResolveTurn();
 
@@ -166,7 +165,7 @@ abstract class Game : IGameContext
 
     public string GetPieceValueForSquare(int squareID)
     {
-        return this.Pieces.FirstOrDefault(p => p.LocationSquareID == squareID)?.Value ?? " ";
+        return this.Pieces.FirstOrDefault(p => p.LocationSquareID == squareID)?.Value ?? "-";
     }
 
     public int GetPieceValueForSquareAsInt(int squareID)
@@ -178,7 +177,6 @@ abstract class Game : IGameContext
     public abstract void ResolveTurn();
 
     public abstract void ShowRuleForTurn();
-
     protected abstract void GameSpecificHelp();
 
     private void DrawPlayerPieces(Player player)
@@ -217,9 +215,10 @@ abstract class Game : IGameContext
         }
         
         DrawPlayerPieces(Player2);
+        
     }
 
-    public Board GetBoard(int index = 0) => Boards?[index] ?? null;
+    public Board GetBoard(int index = 0) => Boards?[index] ?? null!;
     public Piece[] GetPieces() => Pieces;
     public Board[] GetBoards() => Boards;
     public Square[] AllAvailableSquares => GetBoards().SelectMany(board => board.SquaresAvailable).ToArray();
@@ -261,6 +260,7 @@ abstract class Game : IGameContext
     /// For games where a move can win, this will return winning moves. For a game where a move can lose, this will return non-losing moves.
     /// </summary>
     public abstract IEnumerable<Move> GetStrategicMoves();
+
 
     public string PlayerMoveInstructions()
     {
