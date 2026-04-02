@@ -29,10 +29,10 @@ class Human : Player
         Piece piece = GameContext.PlayerSelectsPiece ? null : PiecesAvailable.FirstOrDefault();
         while (piece == null)
         {
-            Console.WriteLine($"Player {this.Position}, enter the number of the piece you'd like to use and press enter to confirm:");
+            ConsoleHelper.WriteLine($"Player {this.Position}, enter the number of the piece you'd like to use and press enter to confirm:");
             string input = Console.ReadLine();
             if (!string.IsNullOrWhiteSpace(input)) { piece = PiecesAvailable.FirstOrDefault(x => x.Value == input); }
-            if (piece == null) Console.WriteLine($"That's not a valid piece, try again Player {this.Position}");
+            if (piece == null) ConsoleHelper.WriteLine($"That's not a valid piece, try again Player {this.Position}");
         }
         
         // Initialise Cursor
@@ -46,7 +46,7 @@ class Human : Player
         bool selected = false;
         do
         {
-            Console.Write(GameContext.PlayerMoveInstructions());
+            ConsoleHelper.Write(GameContext.PlayerMoveInstructions());
 
             key = Console.ReadKey(true);
             if (validKeys.Contains(key.Key)){
@@ -71,7 +71,7 @@ class Human : Player
             }
             else
             {
-                Console.WriteLine("Double check the controls and try navigating with either the arrow keys or n&m.");
+                ConsoleHelper.WriteLine("Double check the controls and try navigating with either the arrow keys or n&m.");
             }
         } while (!selected);
 

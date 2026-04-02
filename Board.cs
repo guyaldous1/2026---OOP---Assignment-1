@@ -85,19 +85,19 @@ class Board
             if (Squares[i].Row == cursorRow && Squares[i].Col == cursorCol)
             {
                 Console.ForegroundColor = cursorColor;
-                Console.Write($"({cursorValue})");
+                ConsoleHelper.Write($"({cursorValue})");
             }
             else if (!Squares[i].IsOccupied)
             {
                 Console.ResetColor();
-                Console.Write($"( )");
+                ConsoleHelper.Write($"( )");
             }
             else
             {
                 Console.ResetColor();
-                Console.Write($"({squareValues[i]})");
+                ConsoleHelper.Write($"({squareValues[i]})");
             }
-            if ((i + 1) % Size == 0) Console.Write("\n");
+            if ((i + 1) % Size == 0) ConsoleHelper.WriteLine();
         }
     }
 
@@ -129,7 +129,7 @@ class Board
 
     private void DrawLine(LineType lineType, int row = -1, string[] squareValues = null, int cursorCol = -1, ConsoleColor cursorColor = ConsoleColor.White, string cursorValue = null)
     {
-        Console.Write(formatChars[(int)lineType, (int)CharType.Start]);
+        ConsoleHelper.Write($"{formatChars[(int)lineType, (int)CharType.Start]}");
 
         for (int column = 0; column < Size; column++)
         {
@@ -151,15 +151,15 @@ class Board
             }
             else
                 outputLine = new string(formatChars[(int)lineType, (int)CharType.Width], SQUARE_WIDTH);
-            Console.Write(outputLine);
+            ConsoleHelper.Write(outputLine);
             Console.ResetColor();
 
             // The final column will end with the End character, others will end with the Border char
             char colChangeChar = column == Size - 1 ? formatChars[(int)lineType, (int)CharType.End] : formatChars[(int)lineType, (int)CharType.Border];
-            Console.Write(colChangeChar);
+            ConsoleHelper.Write($"{colChangeChar}");
         }
 
-        Console.WriteLine();
+        ConsoleHelper.WriteLine();
     }
 }
 
