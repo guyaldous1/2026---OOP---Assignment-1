@@ -93,11 +93,12 @@ abstract class Game : IGameContext
         Console.Clear();
         InitializePlayers();
         InitializeGameBoards();
+        DrawBoards();
     }
 
     public void EndGame()
     {
-        Console.WriteLine("--- Game Over ---");
+        ConsoleHelper.WriteLine("--- Game Over ---");
         Console.ReadLine();
     }
 
@@ -106,13 +107,13 @@ abstract class Game : IGameContext
         int mode = 0;
         while (mode != 1 && mode != 2)
         {
-            Console.WriteLine("-- How would you like to play:");
-            Console.WriteLine("1: Human v Human");
-            Console.WriteLine("2: Human v Computer");
+            ConsoleHelper.WriteLine("-- How would you like to play:");
+            ConsoleHelper.WriteLine("1: Human v Human");
+            ConsoleHelper.WriteLine("2: Human v Computer");
             
             if (!int.TryParse(Console.ReadLine(), out mode) || (mode != 1 && mode != 2))
             {
-                Console.WriteLine("Invalid choice. Please enter 1 or 2.");
+                ConsoleHelper.WriteLine("Invalid choice. Please enter 1 or 2.");
             }
         }
 
@@ -120,36 +121,37 @@ abstract class Game : IGameContext
         this.Player1 = this.PlayerFactory.CreateHumanPlayer(1);
         bool p2IsHuman = mode == 1;
         this.Player2 = p2IsHuman ? this.PlayerFactory.CreateHumanPlayer(2) : this.PlayerFactory.CreateComputerPlayer(2);
-        
+
         Console.Clear();
-        Console.WriteLine($"-- Game Started: Human v {(p2IsHuman ? "Human" : "Computer")} --");
+        ConsoleHelper.WriteLine($"-- Game Started: Human v {(p2IsHuman ? "Human" : "Computer")} --");
     }
 
     public void ShowHelp()
     {
-
         Console.Clear();
 
-        Console.WriteLine("---Game Instructions---");
+        ConsoleHelper.WriteLine("---Game Instructions---");
         GameSpecificHelp();
 
-        Console.WriteLine("\n---Help Menu---");
-        Console.WriteLine("\nYou can use any of the following commands to interact with this menu");
-        
-        Console.WriteLine("turn - return to the game");
-        Console.WriteLine("load - load a different saved game file");
-        Console.WriteLine("save - save the current game for later");
-        Console.WriteLine("undo - undo the turn you just made");
-        Console.WriteLine("redo - redo the any number of turns you've just undone");
-        Console.WriteLine("quit - abandon the game and quit the program without saving");
+        ConsoleHelper.WriteLine("\n---Help Menu---");
+        ConsoleHelper.WriteLine("\nYou can use any of the following commands to interact with this menu");
+
+        ConsoleHelper.WriteLine("turn - return to the game");
+        ConsoleHelper.WriteLine("load - load a different saved game file");
+        ConsoleHelper.WriteLine("save - save the current game for later");
+        ConsoleHelper.WriteLine("undo - undo the turn you just made");
+        ConsoleHelper.WriteLine("redo - redo the any number of turns you've just undone");
+        ConsoleHelper.WriteLine("quit - abandon the game and quit the program without saving");
     }
 
     public void PerformTurn()
     {
-        DrawBoards();
-        Console.WriteLine($"Turn {TurnNumber}: Player {WhoseTurn.Position}'s move.");
+        Console.Clear();
+        ConsoleHelper.WriteLine($"Turn {TurnNumber}: Player {WhoseTurn.Position}'s move.");
 
+        DrawBoards();
         Move move = WhoseTurn.DoMove();
+        DrawBoards();
         this.MoveHistory.StoreNewMove(move);
         ResolveTurn();
 
@@ -165,7 +167,7 @@ abstract class Game : IGameContext
 
     public string GetPieceValueForSquare(int squareID)
     {
-        return this.Pieces.FirstOrDefault(p => p.LocationSquareID == squareID)?.Value ?? "-";
+        return this.Pieces.FirstOrDefault(p => p.LocationSquareID == squareID)?.Value ?? " ";
     }
 
     public int GetPieceValueForSquareAsInt(int squareID)
@@ -177,30 +179,40 @@ abstract class Game : IGameContext
     public abstract void ResolveTurn();
 
     public abstract void ShowRuleForTurn();
+
     protected abstract void GameSpecificHelp();
 
     private void DrawPlayerPieces(Player player)
     {
         Console.ResetColor();
         Console.ForegroundColor = player.Colour;
-        Console.Write($"Player {player.Position}'s Remaining Pieces:");
-        foreach (Piece p in player.PiecesAvailable)
+        Piece[] playerPiecesAvailable = player.PiecesAvailable;
+        if (playerPiecesAvailable.DistinctBy(piece => piece.Value).Count() == 1)
         {
-            Console.Write($" {p.Value}");
+            // All pieces are the same for player, we'll just show one of them
+            ConsoleHelper.Write($"Player {player.Position}'s piece is: {playerPiecesAvailable.First().Value}");
+        }
+        else
+        {
+            ConsoleHelper.Write($"Player {player.Position}'s Remaining Pieces:");
+            foreach (Piece p in player.PiecesAvailable)
+            {
+                Console.Write($" {p.Value}");
+            }
         }
         Console.ResetColor();
-        Console.Write('\n');
+        ConsoleHelper.WriteLine();
     }
 
     public void DrawBoards()
     {
-        Console.Clear();
-        Console.WriteLine($"Turn {this.TurnNumber}. It's Player {this.WhoseTurn.Position}'s Turn");
+        Console.SetCursorPosition( 0, 0 );
+        ConsoleHelper.WriteLine($"Turn {this.TurnNumber}. It's Player {this.WhoseTurn.Position}'s Turn");
         ShowRuleForTurn();
     
         DrawPlayerPieces(Player1);
 
-        Console.Write("\n");
+        ConsoleHelper.WriteLine();
 
         //write each board layout
         foreach (Board board in this.Boards)
@@ -211,14 +223,13 @@ abstract class Game : IGameContext
             int cursorRow = cursorIsOnThisBoard ? human.Cursor.Row : -1;
             int cursorCol = cursorIsOnThisBoard ? human.Cursor.Col : -1;
             board.Draw(boardValues, cursorRow, cursorCol, WhoseTurn.Colour, human?.Cursor.Value ?? string.Empty);
-            Console.Write("\n");
+            ConsoleHelper.WriteLine();
         }
         
         DrawPlayerPieces(Player2);
-        
     }
 
-    public Board GetBoard(int index = 0) => Boards?[index] ?? null!;
+    public Board GetBoard(int index = 0) => Boards?[index] ?? null;
     public Piece[] GetPieces() => Pieces;
     public Board[] GetBoards() => Boards;
     public Square[] AllAvailableSquares => GetBoards().SelectMany(board => board.SquaresAvailable).ToArray();
@@ -260,7 +271,6 @@ abstract class Game : IGameContext
     /// For games where a move can win, this will return winning moves. For a game where a move can lose, this will return non-losing moves.
     /// </summary>
     public abstract IEnumerable<Move> GetStrategicMoves();
-
 
     public string PlayerMoveInstructions()
     {
