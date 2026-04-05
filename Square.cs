@@ -2,14 +2,6 @@
 {
     static private int lastSquareID = 0;
 
-    public int SquareID { get; }  = ++lastSquareID;
-    public bool IsOccupied { get; set; } = false;
-    public int Row { get; }
-    public int Col { get; }
-    public int BoardID { get; }
-
-    public Square() { }
-
     public Square(int row, int col, int boardID)
     {
         Row = row;
@@ -47,6 +39,16 @@
             throw new DeserialisationException($"Invalid format deserialising {nameof(Square)}");
         }
     }
+
+    public int SquareID { get; } = ++lastSquareID;
+
+    public bool IsOccupied { get; set; } = false;
+
+    public int Row { get; }
+
+    public int Col { get; }
+
+    public int BoardID { get; }
 
     public string CaptureState()
     {

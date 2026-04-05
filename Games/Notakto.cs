@@ -1,7 +1,5 @@
 ﻿class Notakto : Game
 {
-    public override string GameType => "notakto";
-
     public Notakto()
     {
     }
@@ -9,6 +7,8 @@
     public Notakto(GameStateMemento state): base(state)
     {
     }
+
+    public override string GameType => "notakto";
 
     public override void ResolveTurn()
     {
@@ -19,14 +19,14 @@
 
         if (boardsWithFullLines.Count == 3)
         {
-            this.Finished = true;
-            ConsoleHelper.WriteLine($"Player {this.WhoseNotTurn.Position} Wins!");
+            Finished = true;
+            ConsoleHelper.WriteLine($"Player {WhoseNotTurn.Position} Wins!");
             return;
         }
 
         if (AllAvailableSquares.Length <= 0)
         {
-            this.Finished = true;
+            Finished = true;
             ConsoleHelper.WriteLine("No winner, it's a tie!");
         }
     }
@@ -34,15 +34,6 @@
     public override void ShowRuleForTurn()
     {
         ConsoleHelper.WriteLine($"The player who places the final X to complete a line on all three boards loses.");
-    }
-
-    protected override void InitializeGameBoards()
-    {
-        //always make three boards of size 3
-        int size = 3;
-        int boardCount = 3;
-
-        InitializeBoards(size, boardCount, "x");
     }
 
     public override IEnumerable<Move> GetStrategicMoves()
@@ -73,6 +64,16 @@
             yield return new Move { PieceID = piece.PieceID, SquareID = safeSquare.SquareID };
         }
     }
+
+    protected override void InitializeGameBoards()
+    {
+        //always make three boards of size 3
+        int size = 3;
+        int boardCount = 3;
+
+        InitializeBoards(size, boardCount, "x");
+    }
+
     protected override void GameSpecificHelp()
     {
         ConsoleHelper.WriteLine("You are playing a game of Notakto. The first player to create a complete column, row or diagonal on each board loses.");

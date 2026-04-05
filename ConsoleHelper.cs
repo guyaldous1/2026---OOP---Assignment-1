@@ -1,4 +1,8 @@
-﻿static class ConsoleHelper
+﻿/// <summary>
+/// Provides line length tracking when redrawing boards. This allows us to move the cursor to 0,0 rather than clearing the console,
+/// as we are redrawing entire lines including trailing spaces. This greatly reduces swcreen flicker.
+/// </summary>
+static class ConsoleHelper
 {
     private const int LINE_LENGTH = 120;
     private static int lineLengthSoFar = 0;
