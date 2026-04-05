@@ -42,7 +42,7 @@ class Cursor
             this.Col = moveTo.Col;
         }
         //Catch out of index for next/prev
-        else if (direction is "next" or "prev") Console.WriteLine("That would take you off the board, try again.");
+        else if (direction is "next" or "prev") ConsoleHelper.WriteLine("That would take you off the board, try again.");
     }
 
     public void MoveBoard(int boardID, Board[] boards)

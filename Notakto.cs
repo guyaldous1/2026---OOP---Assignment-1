@@ -12,8 +12,6 @@
 
     public override void ResolveTurn()
     {
-        DrawBoards();
-
         List<int> boardsWithFullLines = AllFullLines
             .Select(line => line[0].BoardID)
             .Distinct()                      
@@ -22,20 +20,20 @@
         if (boardsWithFullLines.Count == 3)
         {
             this.Finished = true;
-            Console.WriteLine($"Player {this.WhoseNotTurn.Position} Wins!");
+            ConsoleHelper.WriteLine($"Player {this.WhoseNotTurn.Position} Wins!");
             return;
         }
 
         if (AllAvailableSquares.Length <= 0)
         {
             this.Finished = true;
-            Console.WriteLine("No winner, it's a tie!");
+            ConsoleHelper.WriteLine("No winner, it's a tie!");
         }
     }
 
     public override void ShowRuleForTurn()
     {
-        Console.WriteLine($"The player who places the final X to complete a line on all three boards loses.");
+        ConsoleHelper.WriteLine($"The player who places the final X to complete a line on all three boards loses.");
     }
 
     protected override void InitializeGameBoards()
@@ -77,6 +75,6 @@
     }
     protected override void GameSpecificHelp()
     {
-     Console.WriteLine("You are playing a game of Notakto. The first player to create a complete column, row or diagonal on each board loses.");
+        ConsoleHelper.WriteLine("You are playing a game of Notakto. The first player to create a complete column, row or diagonal on each board loses.");
     }
 }

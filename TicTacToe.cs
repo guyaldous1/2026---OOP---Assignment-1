@@ -15,8 +15,6 @@
 
     public override void ResolveTurn()
     {
-        DrawBoards();
-
         foreach (Square[] line in this.Boards[0].Lines)
         {
             bool isFull = Array.TrueForAll(line, el => el.IsOccupied);
@@ -27,7 +25,7 @@
             if (lineSum == this.targetNumber)
             {
                 this.Finished = true;
-                Console.WriteLine($"Player {this.WhoseTurn.Position} Wins!");
+                ConsoleHelper.WriteLine($"Player {this.WhoseTurn.Position} Wins!");
                 return;
             }
         }
@@ -35,13 +33,13 @@
         if (this.Boards[0].SquaresAvailable.Length <= 0)
         {
             this.Finished = true;
-            Console.WriteLine("No winner, it's a tie!");
+            ConsoleHelper.WriteLine("No winner, it's a tie!");
         }
     }
 
     public override void ShowRuleForTurn()
     {
-        Console.WriteLine($"The Target Number is {targetNumber}");
+        ConsoleHelper.WriteLine($"The Target Number is {targetNumber}");
     }
 
     protected override void InitializeGameBoards()
@@ -50,10 +48,10 @@
         int boardCount = 1;
         while (size < 2 || size > 10)
         {
-            Console.WriteLine("-- Enter board size (2-10):");
+            ConsoleHelper.WriteLine("-- Enter board size (2-10):");
             if (!int.TryParse(Console.ReadLine(), out size) || size < 2 || size > 10)
             {
-                Console.WriteLine("Invalid size. Please choose a number between 2 and 10.");
+                ConsoleHelper.WriteLine("Invalid size. Please choose a number between 2 and 10.");
             }
         }
 
@@ -88,6 +86,6 @@
 
     protected override void GameSpecificHelp()
     {
-     Console.WriteLine($"You are playing a game of Numerical TicTacToe. The first player to create a complete column, row or diagonal matching the target number {targetNumber} wins!");
+        ConsoleHelper.WriteLine($"You are playing a game of Numerical TicTacToe. The first player to create a complete column, row or diagonal matching the target number {targetNumber} wins!");
     }
 }
