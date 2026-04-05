@@ -4,38 +4,14 @@ class Board
     private enum CharType { Start, Width, Border, End }
 
     private const int SQUARE_WIDTH = 5;  // Doesn't format well for values less than 3
-    private const int SQUARE_HEIGHT = 3; // Odd numbers are best
+    private const int SQUARE_HEIGHT = 1; // Odd numbers are best
     private readonly char[,] formatChars = { { '┌', '─', '┬', '┐' }, { '│', ' ', '│', '│' }, { '│', ' ', '│', '│' }, { '├', '─', '┼', '┤' }, { '└', '─', '┴', '┘' } };
 
-    public int Size;
-    public Square[] Squares;
-    public int BoardID;
-    public Square[] SquaresAvailable => Array.FindAll(this.Squares, s => !s.IsOccupied);
-    public Square[] Column(int ColNum) => Array.FindAll(this.Squares, s => s.Col == ColNum);
-    public Square[] Row(int RowNum) => Array.FindAll(this.Squares, s => s.Row == RowNum);
-    public Square[] Diagonal(bool LtoR) => Array.FindAll(this.Squares, s => LtoR ? s.Row == s.Col : s.Row + s.Col == this.Size - 1);
-    public List<Square[]> Lines
-    {
-        get
-        {
-            List<Square[]> allLines = new();
-            for (int i = 0; i < Size; i++)
-            {
-                allLines.Add(this.Row(i));
-                allLines.Add(this.Column(i));
-            }
-            allLines.Add(this.Diagonal(true));
-            allLines.Add(this.Diagonal(false));
-            return allLines;
-        }
-    }
-    public List<Square[]> FullLines => Lines.Where(line => line.All(square => square.IsOccupied)).ToList();
-    public List<Square> AllSquares => Squares.ToList();
     public Board(int setSize, int boardID)
     {
-        this.Size = setSize;
-        this.Squares = new Square[Size * Size];
-        this.BoardID = boardID;
+        Size = setSize;
+        Squares = new Square[Size * Size];
+        BoardID = boardID;
 
         for (int row = 0; row < Size; row++)
         {
@@ -70,35 +46,38 @@ class Board
             Squares[squarePos] = new Square(values[squarePos + 2]); // First two positions in state are BoardID and Size, our square state starts after this.
     }
 
+    public int Size { get; }
+
+    public int BoardID { get; }
+
+    public Square[] Squares { get; }
+
+    public Square[] SquaresAvailable => Array.FindAll(Squares, s => !s.IsOccupied);
+
+    public List<Square[]> Lines
+    {
+        get
+        {
+            List<Square[]> allLines = new();
+            for (int i = 0; i < Size; i++)
+            {
+                allLines.Add(Row(i));
+                allLines.Add(Column(i));
+            }
+            allLines.Add(Diagonal(true));
+            allLines.Add(Diagonal(false));
+            return allLines;
+        }
+    }
+
+    public List<Square[]> FullLines => Lines.Where(line => line.All(square => square.IsOccupied)).ToList();
+
     public string CaptureState()
     {
         string result = $"{BoardID},{Size}";
         for (int squarePos = 0; squarePos < Size * Size; squarePos++)
             result += $",{Squares[squarePos].CaptureState()}";
         return result;
-    }
-
-    public void Draw2(string[] squareValues, int cursorRow, int cursorCol, ConsoleColor cursorColor, string cursorValue)
-    {
-        for (int i = 0; i < Squares.Length; i++)
-        {
-            if (Squares[i].Row == cursorRow && Squares[i].Col == cursorCol)
-            {
-                Console.ForegroundColor = cursorColor;
-                ConsoleHelper.Write($"({cursorValue})");
-            }
-            else if (!Squares[i].IsOccupied)
-            {
-                Console.ResetColor();
-                ConsoleHelper.Write($"( )");
-            }
-            else
-            {
-                Console.ResetColor();
-                ConsoleHelper.Write($"({squareValues[i]})");
-            }
-            if ((i + 1) % Size == 0) ConsoleHelper.WriteLine();
-        }
     }
 
     public void Draw(string[] squareValues, int cursorRow, int cursorCol, ConsoleColor cursorColor, string cursorValue)
@@ -161,5 +140,12 @@ class Board
 
         ConsoleHelper.WriteLine();
     }
+
+    private Square[] Column(int ColNum) => Array.FindAll(Squares, s => s.Col == ColNum);
+
+    private Square[] Row(int RowNum) => Array.FindAll(Squares, s => s.Row == RowNum);
+
+    private Square[] Diagonal(bool LtoR) => Array.FindAll(Squares, s => LtoR ? s.Row == s.Col : s.Row + s.Col == Size - 1);
+
 }
 

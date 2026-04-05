@@ -1,9 +1,7 @@
 ﻿class TicTacToe : Game
 {
-    public override string GameType => "tictactoe";
-    public override bool PlayerSelectsPiece => true;
-
-    private int targetNumber => Boards[0].Size * (Boards[0].Size * Boards[0].Size + 1) / 2;
+    private const int MIN_BOARD_SIZE = 3;
+    private const int MAX_BOARD_SIZE = 10;
 
     public TicTacToe()
     {
@@ -13,26 +11,32 @@
     {
     }
 
+    private int targetNumber => Boards[0].Size * (Boards[0].Size * Boards[0].Size + 1) / 2;
+
+    public override string GameType => "tictactoe";
+
+    public override bool PlayerSelectsPiece => true;
+
     public override void ResolveTurn()
     {
-        foreach (Square[] line in this.Boards[0].Lines)
+        foreach (Square[] line in Boards[0].Lines)
         {
             bool isFull = Array.TrueForAll(line, el => el.IsOccupied);
             if (!isFull) continue;
 
             int lineSum = line.Select(sq => sq.SquareID).Sum(GetPieceValueForSquareAsInt);
 
-            if (lineSum == this.targetNumber)
+            if (lineSum == targetNumber)
             {
-                this.Finished = true;
-                ConsoleHelper.WriteLine($"Player {this.WhoseTurn.Position} Wins!");
+                Finished = true;
+                ConsoleHelper.WriteLine($"Player {WhoseTurn.Position} Wins!");
                 return;
             }
         }
 
-        if (this.Boards[0].SquaresAvailable.Length <= 0)
+        if (Boards[0].SquaresAvailable.Length <= 0)
         {
-            this.Finished = true;
+            Finished = true;
             ConsoleHelper.WriteLine("No winner, it's a tie!");
         }
     }
@@ -42,26 +46,10 @@
         ConsoleHelper.WriteLine($"The Target Number is {targetNumber}");
     }
 
-    protected override void InitializeGameBoards()
-    {
-        int size = 0;
-        int boardCount = 1;
-        while (size < 2 || size > 10)
-        {
-            ConsoleHelper.WriteLine("-- Enter board size (2-10):");
-            if (!int.TryParse(Console.ReadLine(), out size) || size < 2 || size > 10)
-            {
-                ConsoleHelper.WriteLine("Invalid size. Please choose a number between 2 and 10.");
-            }
-        }
-
-        InitializeBoards(size, boardCount, "numbers");
-    }
-
     public override IEnumerable<Move> GetStrategicMoves()
     {
         //Build a list of lines that have one space free/almost full        
-        List<Square[]> AlmostFullLines = GetBoards()
+        List<Square[]> AlmostFullLines = Boards
             .SelectMany(board => board.Lines)
             .Where(line => line.Count(sq => sq.IsOccupied) == line.Length - 1)
             .ToList();
@@ -82,6 +70,22 @@
                 }
             }
         }
+    }
+
+    protected override void InitializeGameBoards()
+    {
+        int size = 0;
+        int boardCount = 1;
+        while (size < MIN_BOARD_SIZE || size > MAX_BOARD_SIZE)
+        {
+            ConsoleHelper.WriteLine($"-- Enter board size ({MIN_BOARD_SIZE}-{MAX_BOARD_SIZE}):");
+            if (!int.TryParse(Console.ReadLine(), out size) || size < MIN_BOARD_SIZE || size > MAX_BOARD_SIZE)
+            {
+                ConsoleHelper.WriteLine($"Invalid size. Please choose a number between {MIN_BOARD_SIZE} and {MAX_BOARD_SIZE}.");
+            }
+        }
+
+        InitializeBoards(size, boardCount, "numbers");
     }
 
     protected override void GameSpecificHelp()

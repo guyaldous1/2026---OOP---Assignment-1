@@ -39,6 +39,14 @@
         }
     }
 
+    public string CaptureState()
+    {
+        string result = $"{currentMove}";
+        foreach (Move move in moves)
+            result += $",{move.PieceID},{move.SquareID}";
+        return result;
+    }
+
     public void StoreNewMove(Move move)
     {
         // If the current move is not the latest move in the list, it now needs to be. The old "future" is discarded by playing a real move.
@@ -65,13 +73,5 @@
         }
 
         return moves[++currentMove];
-    }
-
-    public string CaptureState()
-    {
-        string result = $"{currentMove}";
-        foreach (Move move in moves)
-            result += $",{move.PieceID},{move.SquareID}";
-        return result;
     }
 }

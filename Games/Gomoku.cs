@@ -2,8 +2,6 @@
 
 class Gomoku : Game
 {
-    public override string GameType => "gomoku";
-
     public Gomoku()
     {
     }
@@ -11,8 +9,10 @@ class Gomoku : Game
     public Gomoku(GameStateMemento state): base(state)
     {
     }
-    
-    List<string> LineStrings => Boards[0].Lines.Select(line => string.Concat(line.Select(sq => GetPieceValueForSquare(sq.SquareID)))).ToList();
+
+    public override string GameType => "gomoku";
+
+    private List<string> LineStrings => Boards[0].Lines.Select(line => string.Concat(line.Select(sq => GetPieceValueForSquare(sq.SquareID)))).ToList();
     
     public override void ResolveTurn()
     {
@@ -42,15 +42,6 @@ class Gomoku : Game
         ConsoleHelper.WriteLine($"First line of 5 in a row wins, lines greater than 5 don't count");
     }
 
-    protected override void InitializeGameBoards()
-    {
-        //always make 1 board of size 15
-        int size = 15;
-        int boardCount = 1;
-
-        InitializeBoards(size, boardCount, "xo");
-    }
-
     public override IEnumerable<Move> GetStrategicMoves()
     {
         Piece[] currentPlayerPieces = WhoseTurn.PiecesAvailable;
@@ -78,6 +69,16 @@ class Gomoku : Game
             }
         }
     }
+
+    protected override void InitializeGameBoards()
+    {
+        //always make 1 board of size 15
+        int size = 15;
+        int boardCount = 1;
+
+        InitializeBoards(size, boardCount, "xo");
+    }
+
     protected override void GameSpecificHelp()
     {
         ConsoleHelper.WriteLine("You are playing a game of Gomoku. The first player to create a row, column or diagonal of exactly 5 of their pieces wins! 6 and above doesn't end the game.");

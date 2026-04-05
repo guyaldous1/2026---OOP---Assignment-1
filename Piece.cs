@@ -2,11 +2,6 @@ class Piece
 {
     static private int lastPieceID = 0;
 
-    public int PieceID = ++lastPieceID;
-    public string Value { get; set; }
-    public int LocationSquareID { get; private set; } = -1;
-    public int OwnerPosition { get; }
-
     public Piece(string val, int ownerPosition)
     {
         Value = val;
@@ -29,6 +24,14 @@ class Piece
             throw new DeserialisationException($"Invalid format deserialising {nameof(Piece)}");
         }
     }
+
+    public int PieceID { get; } = ++lastPieceID;
+
+    public string Value { get; set; }
+
+    public int LocationSquareID { get; private set; } = -1;
+
+    public int OwnerPosition { get; }
 
     public string CaptureState()
     {

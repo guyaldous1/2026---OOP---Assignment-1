@@ -1,12 +1,11 @@
-﻿using System.Net.NetworkInformation;
-using System.Text.Json;
+﻿using System.Text.Json;
 
 // ============================================================
 // MAIN PROGRAM
 // ============================================================
 class Program
 {
-    static void Main(string[] args)
+    public static void Main(string[] args)
     {
         Console.OutputEncoding = System.Text.Encoding.UTF8;
         ShowBanner();
@@ -40,16 +39,22 @@ class Program
         Console.ReadKey();
     }
 
-    static void ShowBanner()
+    private static void ShowBanner()
     {
         Console.Clear();
-        Console.WriteLine("  ╔══════════════════════════════════════════╗");
-        Console.WriteLine("  ║      Board Games Framework v3.0          ║");
-        Console.WriteLine("  ║  Numerical TTT  •  Notakto  •  Gomoku    ║");
-        Console.WriteLine("  ╚══════════════════════════════════════════╝");
+        Console.WriteLine("                ╔══════════════════════════════════════════╗");
+        Console.WriteLine("                ║      Board Games Framework v3.0          ║");
+        Console.WriteLine("                ║  Numerical TTT  •  Notakto  •  Gomoku    ║");
+        Console.WriteLine("                ╚══════════════════════════════════════════╝");
+        Console.WriteLine();
+        Console.Write("Note: for best display results, please maximise your command window ");
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("NOW.");
+        Console.ResetColor();
+        Console.WriteLine();
     }
 
-    static string GameTypeNumericToGameType(string gameTypeNumeric)
+    private static string GameTypeNumericToGameType(string gameTypeNumeric)
     {
         switch(gameTypeNumeric)
         {
@@ -59,7 +64,7 @@ class Program
         }
     }
 
-    static void RunGame(Game game)
+    private static void RunGame(Game game)
     {
         // THE GAME LOOP (Iterative instead of Recursive)
         // This runs until 'Finished' is set to true in ResolveTurn
@@ -101,7 +106,7 @@ class Program
         }
     }
 
-    static private string GetCommand(string currentCommand)
+    private static string GetCommand(string currentCommand)
     {
         string helptext = "\n";
 
@@ -118,7 +123,7 @@ class Program
         return string.IsNullOrWhiteSpace(command) ? "turn" : command;
     }
 
-    static private void SaveGame(Game game)
+    private static void SaveGame(Game game)
     {
         string json = JsonSerializer.Serialize(game.CaptureState(), new JsonSerializerOptions { WriteIndented = true });
         Directory.CreateDirectory("saves");
@@ -127,10 +132,10 @@ class Program
         Console.WriteLine($"  💾 Game saved to {filename}");
     }
 
-    static private Game LoadGame()
+    private static Game LoadGame()
     {
         // Check for saved games
-        var saveFiles = Directory.Exists("saves") ? Directory.GetFiles("saves", "savegame_*.json").OrderByDescending(f => f).ToArray() : [];
+        string[] saveFiles = Directory.Exists("saves") ? Directory.GetFiles("saves", "savegame_*.json").OrderByDescending(f => f).ToArray() : [];
         Game game = null;
 
         if (saveFiles.Length == 0)
@@ -167,7 +172,7 @@ class Program
         return game;
     }
 
-    static private void UndoTurn(Game game)
+    private static void UndoTurn(Game game)
     {
         if (game is null)
         {
@@ -189,7 +194,7 @@ class Program
         }
     }
 
-    static private void RedoTurn(Game game)
+    private static void RedoTurn(Game game)
     {
         try
         {
