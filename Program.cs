@@ -42,16 +42,10 @@ class Program
     private static void ShowBanner()
     {
         Console.Clear();
-        Console.WriteLine("                ╔══════════════════════════════════════════╗");
-        Console.WriteLine("                ║      Board Games Framework v3.0          ║");
-        Console.WriteLine("                ║  Numerical TTT  •  Notakto  •  Gomoku    ║");
-        Console.WriteLine("                ╚══════════════════════════════════════════╝");
-        Console.WriteLine();
-        Console.Write("Note: for best display results, please maximise your command window ");
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("NOW.");
-        Console.ResetColor();
-        Console.WriteLine();
+        Console.WriteLine("╔══════════════════════════════════════════╗");
+        Console.WriteLine("║      Board Games Framework v3.0          ║");
+        Console.WriteLine("║  Numerical TTT  •  Notakto  •  Gomoku    ║");
+        Console.WriteLine("╚══════════════════════════════════════════╝");
     }
 
     private static string GameTypeNumericToGameType(string gameTypeNumeric)

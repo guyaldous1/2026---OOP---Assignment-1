@@ -26,20 +26,20 @@ class Gomoku : Game
         if (WinningStrings.Count > 0)
         {
             Finished = true;
-            ConsoleHelper.WriteLine($"Player {WhoseTurn.Position} Wins!");
+            Console.WriteLine($"Player {WhoseTurn.Position} Wins!");
             return;
         }
 
         if (AllAvailableSquares.Length <= 0)
         {
             Finished = true;
-            ConsoleHelper.WriteLine("No winner, it's a tie!");
+            Console.WriteLine("No winner, it's a tie!");
         }
     }
 
     public override void ShowRuleForTurn()
     {
-        ConsoleHelper.WriteLine($"First line of 5 in a row wins, lines greater than 5 don't count");
+        Console.WriteLine($"First line of 5 in a row wins, lines greater than 5 don't count");
     }
 
     public override IEnumerable<Move> GetStrategicMoves()
@@ -81,6 +81,6 @@ class Gomoku : Game
 
     protected override void GameSpecificHelp()
     {
-        ConsoleHelper.WriteLine("You are playing a game of Gomoku. The first player to create a row, column or diagonal of exactly 5 of their pieces wins! 6 and above doesn't end the game.");
+        Console.WriteLine("You are playing a game of Gomoku. The first player to create a row, column or diagonal of exactly 5 of their pieces wins! 6 and above doesn't end the game.");
     }
 }
