@@ -12,6 +12,8 @@ abstract class Game : IGameContext
 
     public Game(GameStateMemento state)
     {
+        PlayerFactory = new PlayerFactory(this);
+
         int boardCount = 0;
         int pieceCount = 0;
         string[] boardValues = null;

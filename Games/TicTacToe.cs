@@ -1,5 +1,8 @@
 ﻿class TicTacToe : Game
 {
+    private const int MIN_BOARD_SIZE = 3;
+    private const int MAX_BOARD_SIZE = 10;
+
     public TicTacToe()
     {
     }
@@ -73,12 +76,12 @@
     {
         int size = 0;
         int boardCount = 1;
-        while (size < 2 || size > 10)
+        while (size < MIN_BOARD_SIZE || size > MAX_BOARD_SIZE)
         {
-            ConsoleHelper.WriteLine("-- Enter board size (2-10):");
-            if (!int.TryParse(Console.ReadLine(), out size) || size < 2 || size > 10)
+            ConsoleHelper.WriteLine($"-- Enter board size ({MIN_BOARD_SIZE}-{MAX_BOARD_SIZE}):");
+            if (!int.TryParse(Console.ReadLine(), out size) || size < MIN_BOARD_SIZE || size > MAX_BOARD_SIZE)
             {
-                ConsoleHelper.WriteLine("Invalid size. Please choose a number between 2 and 10.");
+                ConsoleHelper.WriteLine($"Invalid size. Please choose a number between {MIN_BOARD_SIZE} and {MAX_BOARD_SIZE}.");
             }
         }
 
