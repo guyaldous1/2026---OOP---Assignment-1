@@ -110,7 +110,7 @@ abstract class Game : IGameContext
 
     public void EndGame()
     {
-        ConsoleHelper.WriteLine("--- Game Over ---");
+        Console.WriteLine("--- Game Over ---");
         Console.ReadLine();
     }
 
@@ -118,24 +118,24 @@ abstract class Game : IGameContext
     {
         Console.Clear();
 
-        ConsoleHelper.WriteLine("---Game Instructions---");
+        Console.WriteLine("---Game Instructions---");
         GameSpecificHelp();
 
-        ConsoleHelper.WriteLine("\n---Help Menu---");
-        ConsoleHelper.WriteLine("\nYou can use any of the following commands to interact with this menu");
+        Console.WriteLine("\n---Help Menu---");
+        Console.WriteLine("\nYou can use any of the following commands to interact with this menu");
 
-        ConsoleHelper.WriteLine("turn - return to the game");
-        ConsoleHelper.WriteLine("load - load a different saved game file");
-        ConsoleHelper.WriteLine("save - save the current game for later");
-        ConsoleHelper.WriteLine("undo - undo the turn you just made");
-        ConsoleHelper.WriteLine("redo - redo the any number of turns you've just undone");
-        ConsoleHelper.WriteLine("quit - abandon the game and quit the program without saving");
+        Console.WriteLine("turn - return to the game");
+        Console.WriteLine("load - load a different saved game file");
+        Console.WriteLine("save - save the current game for later");
+        Console.WriteLine("undo - undo the turn you just made");
+        Console.WriteLine("redo - redo the any number of turns you've just undone");
+        Console.WriteLine("quit - abandon the game and quit the program without saving");
     }
 
     public void PerformTurn()
     {
         Console.Clear();
-        ConsoleHelper.WriteLine($"Turn {TurnNumber}: Player {WhoseTurn.Position}'s move.");
+        Console.WriteLine($"Turn {TurnNumber}: Player {WhoseTurn.Position}'s move.");
 
         DrawBoards();
         Move move = WhoseTurn.DoMove();
@@ -166,13 +166,13 @@ abstract class Game : IGameContext
 
     public void DrawBoards()
     {
-        Console.SetCursorPosition(0, 0);
-        ConsoleHelper.WriteLine($"Turn {TurnNumber}. It's Player {WhoseTurn.Position}'s Turn");
+        Console.Clear();
+        Console.WriteLine($"Turn {TurnNumber}. It's Player {WhoseTurn.Position}'s Turn");
         ShowRuleForTurn();
 
         DrawPlayerPieces(Player1);
 
-        ConsoleHelper.WriteLine();
+        Console.WriteLine();
 
         //write each board layout
         foreach (Board board in Boards)
@@ -183,7 +183,7 @@ abstract class Game : IGameContext
             int cursorRow = cursorIsOnThisBoard ? human.Cursor.Row : -1;
             int cursorCol = cursorIsOnThisBoard ? human.Cursor.Col : -1;
             board.Draw(boardValues, cursorRow, cursorCol, WhoseTurn.Colour, human?.Cursor.Value ?? string.Empty);
-            ConsoleHelper.WriteLine();
+            Console.WriteLine();
         }
 
         DrawPlayerPieces(Player2);
@@ -281,13 +281,13 @@ abstract class Game : IGameContext
         int mode = 0;
         while (mode != 1 && mode != 2)
         {
-            ConsoleHelper.WriteLine("-- How would you like to play:");
-            ConsoleHelper.WriteLine("1: Human v Human");
-            ConsoleHelper.WriteLine("2: Human v Computer");
+            Console.WriteLine("-- How would you like to play:");
+            Console.WriteLine("1: Human v Human");
+            Console.WriteLine("2: Human v Computer");
 
             if (!int.TryParse(Console.ReadLine(), out mode) || (mode != 1 && mode != 2))
             {
-                ConsoleHelper.WriteLine("Invalid choice. Please enter 1 or 2.");
+                Console.WriteLine("Invalid choice. Please enter 1 or 2.");
             }
         }
 
@@ -296,7 +296,7 @@ abstract class Game : IGameContext
         Player2 = p2IsHuman ? PlayerFactory.CreateHumanPlayer(2) : PlayerFactory.CreateComputerPlayer(2);
 
         Console.Clear();
-        ConsoleHelper.WriteLine($"-- Game Started: Human v {(p2IsHuman ? "Human" : "Computer")} --");
+        Console.WriteLine($"-- Game Started: Human v {(p2IsHuman ? "Human" : "Computer")} --");
     }
 
     private void DrawPlayerPieces(Player player)
@@ -307,11 +307,11 @@ abstract class Game : IGameContext
         if (playerPiecesAvailable.DistinctBy(piece => piece.Value).Count() == 1)
         {
             // All pieces are the same for player, we'll just show one of them
-            ConsoleHelper.Write($"Player {player.Position}'s piece is: {playerPiecesAvailable.First().Value}");
+            Console.Write($"Player {player.Position}'s piece is: {playerPiecesAvailable.First().Value}");
         }
         else
         {
-            ConsoleHelper.Write($"Player {player.Position}'s Remaining Pieces:");
+            Console.Write($"Player {player.Position}'s Remaining Pieces:");
             foreach (Piece p in player.PiecesAvailable)
             {
                 Console.Write($" {p.Value}");
@@ -319,6 +319,6 @@ abstract class Game : IGameContext
         }
 
         Console.ResetColor();
-        ConsoleHelper.WriteLine();
+        Console.WriteLine();
     }
 }

@@ -29,7 +29,7 @@
             if (lineSum == targetNumber)
             {
                 Finished = true;
-                ConsoleHelper.WriteLine($"Player {WhoseTurn.Position} Wins!");
+                Console.WriteLine($"Player {WhoseTurn.Position} Wins!");
                 return;
             }
         }
@@ -37,13 +37,13 @@
         if (Boards[0].SquaresAvailable.Length <= 0)
         {
             Finished = true;
-            ConsoleHelper.WriteLine("No winner, it's a tie!");
+            Console.WriteLine("No winner, it's a tie!");
         }
     }
 
     public override void ShowRuleForTurn()
     {
-        ConsoleHelper.WriteLine($"The Target Number is {targetNumber}");
+        Console.WriteLine($"The Target Number is {targetNumber}");
     }
 
     public override IEnumerable<Move> GetStrategicMoves()
@@ -78,10 +78,10 @@
         int boardCount = 1;
         while (size < MIN_BOARD_SIZE || size > MAX_BOARD_SIZE)
         {
-            ConsoleHelper.WriteLine($"-- Enter board size ({MIN_BOARD_SIZE}-{MAX_BOARD_SIZE}):");
+            Console.WriteLine($"-- Enter board size ({MIN_BOARD_SIZE}-{MAX_BOARD_SIZE}):");
             if (!int.TryParse(Console.ReadLine(), out size) || size < MIN_BOARD_SIZE || size > MAX_BOARD_SIZE)
             {
-                ConsoleHelper.WriteLine($"Invalid size. Please choose a number between {MIN_BOARD_SIZE} and {MAX_BOARD_SIZE}.");
+                Console.WriteLine($"Invalid size. Please choose a number between {MIN_BOARD_SIZE} and {MAX_BOARD_SIZE}.");
             }
         }
 
@@ -90,6 +90,6 @@
 
     protected override void GameSpecificHelp()
     {
-        ConsoleHelper.WriteLine($"You are playing a game of Numerical TicTacToe. The first player to create a complete column, row or diagonal matching the target number {targetNumber} wins!");
+        Console.WriteLine($"You are playing a game of Numerical TicTacToe. The first player to create a complete column, row or diagonal matching the target number {targetNumber} wins!");
     }
 }
