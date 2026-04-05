@@ -52,8 +52,6 @@ class Board
 
     public Square[] Squares { get; }
 
-    public List<Square> AllSquares => Squares.ToList(); // TODO
-
     public Square[] SquaresAvailable => Array.FindAll(Squares, s => !s.IsOccupied);
 
     public List<Square[]> Lines

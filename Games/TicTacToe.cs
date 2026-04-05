@@ -46,7 +46,7 @@
     public override IEnumerable<Move> GetStrategicMoves()
     {
         //Build a list of lines that have one space free/almost full        
-        List<Square[]> AlmostFullLines = GetBoards()
+        List<Square[]> AlmostFullLines = Boards
             .SelectMany(board => board.Lines)
             .Where(line => line.Count(sq => sq.IsOccupied) == line.Length - 1)
             .ToList();

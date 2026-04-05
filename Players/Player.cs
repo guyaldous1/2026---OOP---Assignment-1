@@ -10,7 +10,7 @@ abstract class Player
 
     public int Position { get; }
 
-    public Piece[] Pieces => Array.FindAll(gameContext.GetPieces() ?? [], p => p.OwnerPosition == Position);
+    public Piece[] Pieces => Array.FindAll(gameContext.Pieces ?? [], p => p.OwnerPosition == Position);
 
     public Piece[] PiecesAvailable => Array.FindAll(Pieces, p => p.LocationSquareID == -1);
 

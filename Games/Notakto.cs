@@ -44,7 +44,7 @@
             .ToList();
 
         // Squares that would complete a line on a still-live board — playing here risks losing
-        int[] dangerousSquareIDs = GetBoards()
+        int[] dangerousSquareIDs = Boards
             .Where(board => !boardsWithFullLines.Contains(board.BoardID))
             .SelectMany(board => board.Lines!)
             .Where(line => line.Count(sq => sq.IsOccupied) == line.Length - 1)

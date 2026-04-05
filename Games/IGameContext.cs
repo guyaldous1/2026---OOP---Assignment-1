@@ -3,14 +3,13 @@
 // ============================================================
 interface IGameContext
 {
-    Square[] AllAvailableSquares { get; }
-    List<Square[]> AllFullLines { get; }
     string GameType { get; }
     bool PlayerSelectsPiece { get; }
-    Board GetBoard(int index = 0);
-    Board[] GetBoards();
+    Square[] AllAvailableSquares { get; }
+    List<Square[]> AllFullLines { get; }
+    Board[] Boards { get; }
+    Piece[] Pieces { get; }
     void DrawBoards();
-    Piece[] GetPieces();
     string GetPieceValueForSquare(int squareID);
     int GetPieceValueForSquareAsInt(int squareID);
     IEnumerable<Move> GetStrategicMoves();

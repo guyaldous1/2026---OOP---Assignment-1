@@ -21,7 +21,7 @@
         }
 
         // Initialise Cursor
-        Square startingLocation = gameContext.GetBoards().First(b => b.SquaresAvailable.Length > 0).SquaresAvailable[0];
+        Square startingLocation = gameContext.Boards.First(b => b.SquaresAvailable.Length > 0).SquaresAvailable[0];
         Cursor.SetLocation(startingLocation.BoardID, startingLocation.Row, startingLocation.Col);
         Cursor.Value = piece.Value;
         gameContext.DrawBoards();
@@ -37,7 +37,7 @@
             if (validKeys.Contains(key.Key))
             {
 
-                Board[] boards = gameContext.GetBoards();
+                Board[] boards = gameContext.Boards;
                 if (key.Key == ConsoleKey.LeftArrow) Cursor.MoveLocation("left", boards);
                 if (key.Key == ConsoleKey.RightArrow) Cursor.MoveLocation("right", boards);
                 if (key.Key == ConsoleKey.UpArrow) Cursor.MoveLocation("up", boards);
@@ -62,7 +62,7 @@
         } while (!selected);
 
         int currentBoard = Cursor.BoardID;
-        Square sq = gameContext.GetBoard(currentBoard).Squares.FirstOrDefault(x => x.Row == Cursor.Row && x.Col == Cursor.Col);
+        Square sq = gameContext.Boards[currentBoard].Squares.FirstOrDefault(x => x.Row == Cursor.Row && x.Col == Cursor.Col);
         piece.Place(sq);
 
         //remove cursor from the board

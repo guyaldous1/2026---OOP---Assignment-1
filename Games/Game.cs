@@ -51,10 +51,10 @@ abstract class Game : IGameContext
 
     public Player Player2 { get; private set; } = null;
 
-    public Board[] Boards { get; protected set; } = null; // TODO private
+    public Board[] Boards { get; set; } = null;
 
-    public Piece[] Pieces { get; protected set; } = Array.Empty<Piece>(); // TODO private
-    
+    public Piece[] Pieces { get; set; } = Array.Empty<Piece>();
+
     public int TurnNumber { get; private set; } = 1;
 
     public bool Finished { get; protected set; } = false;
@@ -68,11 +68,11 @@ abstract class Game : IGameContext
 
     public Player WhoseNotTurn => TurnNumber % 2 == 0 ? Player1 : Player2;
 
-    public Square[] AllAvailableSquares => GetBoards().SelectMany(board => board.SquaresAvailable).ToArray();
+    public Square[] AllAvailableSquares => Boards.SelectMany(board => board.SquaresAvailable).ToArray();
 
-    public List<Square[]> AllFullLines => GetBoards().SelectMany(board => board.FullLines).ToList();
+    public List<Square[]> AllFullLines => Boards.SelectMany(board => board.FullLines).ToList();
 
-    public List<Square> AllSquares => GetBoards().SelectMany(board => board.AllSquares).ToList();
+    public List<Square> AllSquares => Boards.SelectMany(board => board.Squares).ToList();
 
     public GameStateMemento CaptureState()
     {
@@ -186,12 +186,6 @@ abstract class Game : IGameContext
 
         DrawPlayerPieces(Player2);
     }
-
-    public Board GetBoard(int index = 0) => Boards?[index] ?? null;
-
-    public Board[] GetBoards() => Boards;
-
-    public Piece[] GetPieces() => Pieces;
 
     public string PlayerMoveInstructions()
     {
