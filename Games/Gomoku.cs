@@ -48,8 +48,10 @@ class Gomoku : Game
         string pieceValue = currentPlayerPieces.FirstOrDefault()?.Value;
         if (pieceValue == null) yield break;
 
-        //Find patterns of 4 but not 5
-        string pattern = pieceValue == "O" ? "-OOOO|OOOO-" : "-XXXX|XXXX-";
+        // Find patterns of 4 but not 5, excluding groups of 6+
+        string pattern = pieceValue == "O"
+            ? @"(?<!O)-OOOO(?!O)|(?<!O)O-OOO(?!O)|(?<!O)OO-OO(?!O)|(?<!O)OOO-O(?!O)|(?<!O)OOOO-(?!O)"
+            : @"(?<!X)-XXXX(?!X)|(?<!X)X-XXX(?!X)|(?<!X)XX-XX(?!X)|(?<!X)XXX-X(?!X)|(?<!X)XXXX-(?!X)";
 
         foreach (Square[] line in Boards[0].GetLines(true))
         {
@@ -59,9 +61,7 @@ class Gomoku : Game
             if (match.Success)
             {
                 // Find the index of the '-' within the matched part and select that as the winning square
-                int dashIndex = match.Value.StartsWith('-')
-                    ? match.Index
-                    : match.Index + 4;
+                int dashIndex = match.Index + match.Value.IndexOf('-');
 
                 Square winningSquare = line[dashIndex];
 
