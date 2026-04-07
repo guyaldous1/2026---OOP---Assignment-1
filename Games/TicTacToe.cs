@@ -19,7 +19,7 @@
 
     public override void ResolveTurn()
     {
-        foreach (Square[] line in Boards[0].Lines)
+        foreach (Square[] line in Boards[0].GetLines())
         {
             bool isFull = Array.TrueForAll(line, el => el.IsOccupied);
             if (!isFull) continue;
@@ -49,8 +49,7 @@
     public override IEnumerable<Move> GetStrategicMoves()
     {
         //Build a list of lines that have one space free/almost full        
-        List<Square[]> AlmostFullLines = Boards
-            .SelectMany(board => board.Lines)
+        List<Square[]> AlmostFullLines = Boards[0].GetLines()
             .Where(line => line.Count(sq => sq.IsOccupied) == line.Length - 1)
             .ToList();
 

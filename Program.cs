@@ -79,8 +79,11 @@ class Program
                     finished = true;
                     break;
                 case "load":
-                    game = LoadGame();
-                    finished = game.Finished;
+                    Game loadedGame = LoadGame();
+                    if (loadedGame is not null) // if user bails without choosing a game, we return to the current one.
+                    {
+                        game = loadedGame;
+                    }
                     break;
                 case "save":
                     SaveGame(game);
@@ -139,12 +142,12 @@ class Program
         }
 
         Console.WriteLine("\n  💾 Saved games found:");
-        for (int i = 0; i < Math.Min(saveFiles.Length, 5); i++)
+        for (int i = 0; i < Math.Min(saveFiles.Length, 9); i++)
             Console.WriteLine($"     {i + 1}. {Path.GetFileName(saveFiles[i])}");
         Console.Write("\n  Load a save? (enter number or press Enter for new game): ");
         string choice = Console.ReadLine()?.Trim();
 
-        if (int.TryParse(choice, out int idx) && idx >= 1 && idx <= Math.Min(saveFiles.Length, 5))
+        if (int.TryParse(choice, out int idx) && idx >= 1 && idx <= Math.Min(saveFiles.Length, 9))
         {
             try
             {

@@ -7,7 +7,7 @@
 
     public MoveHistory(string state)
     {
-        // Format is length,move0.pieceId,move0.squareId,move1.pieceId,move1.squareId...
+        // Format is current-move-index,move0.pieceId,move0.squareId,move1.pieceId,move1.squareId...
         int[] values = [];
         try
         {
@@ -22,12 +22,15 @@
         {
             throw new DeserialisationException($"Invalid length marker in {nameof(MoveHistory)}");
         }
-        if (values.Length != values[0] * 2 + 1)
+
+        currentMove = values[0];
+
+        // Length test is (1) must be odd (see format above), (2) must be at least as long as currentMove (0-based, so +1), * 2, plus 1 for currentMove itself.
+        if (values.Length % 2 != 1 || values.Length < (currentMove + 1) * 2 + 1)
         {
             throw new DeserialisationException($"Invalid move length for {nameof(MoveHistory)}");
         }
 
-        currentMove = values[0];
         for (int i=1; i < values.Length; i += 2)
         {
             moves.Add(

@@ -12,7 +12,7 @@ class Gomoku : Game
 
     public override string GameType => "gomoku";
 
-    private List<string> LineStrings => Boards[0].Lines.Select(line => string.Concat(line.Select(sq => GetPieceValueForSquare(sq.SquareID)))).ToList();
+    private List<string> LineStrings => Boards[0].GetLines(true).Select(line => string.Concat(line.Select(sq => GetPieceValueForSquare(sq.SquareID)))).ToList();
     
     public override void ResolveTurn()
     {
@@ -51,7 +51,7 @@ class Gomoku : Game
         //Find patterns of 4 but not 5
         string pattern = pieceValue == "O" ? "-OOOO|OOOO-" : "-XXXX|XXXX-";
 
-        foreach (Square[] line in Boards[0].Lines)
+        foreach (Square[] line in Boards[0].GetLines(true))
         {
             string lineString = string.Concat(line.Select(sq => GetPieceValueForSquare(sq.SquareID)));
             Match match = Regex.Match(lineString, pattern);
