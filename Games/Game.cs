@@ -46,6 +46,8 @@ abstract class Game : IGameContext
         Pieces = new Piece[pieceCount];
         for (int i = 0; i < pieceCount; i++)
             Pieces[i] = new Piece(pieceValues[i + 1]); // offset by 1 because of length value at start of string
+
+        MoveHistory = new MoveHistory(state.MoveHistory);
     }
 
     // Properties - marked as 'null!' because they are initialized in Setup()
